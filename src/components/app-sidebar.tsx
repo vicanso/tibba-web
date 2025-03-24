@@ -1,5 +1,4 @@
 import * as React from "react"
-import { SearchForm } from "@/components/search-form";
 import { AppSwitcher } from "@/components/app-switcher";
 import {
     Sidebar,
@@ -14,159 +13,39 @@ import {
     SidebarRail,
     SidebarFooter,
 } from "@/components/ui/sidebar"
-import { NavUser } from "@/components/nav-user";
-// This is sample data.
-const data = {
-    apps: ["Tibba Web", "Tibba Admin"],
-    navMain: [
-        {
-            title: "Getting Started",
-            url: "#",
-            items: [
-                {
-                    title: "Installation",
-                    url: "#",
-                },
-                {
-                    title: "Project Structure",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Building Your Application",
-            url: "#",
-            items: [
-                {
-                    title: "Routing",
-                    url: "#",
-                },
-                {
-                    title: "Data Fetching",
-                    url: "#",
-                    isActive: true,
-                },
-                {
-                    title: "Rendering",
-                    url: "#",
-                },
-                {
-                    title: "Caching",
-                    url: "#",
-                },
-                {
-                    title: "Styling",
-                    url: "#",
-                },
-                {
-                    title: "Optimizing",
-                    url: "#",
-                },
-                {
-                    title: "Configuring",
-                    url: "#",
-                },
-                {
-                    title: "Testing",
-                    url: "#",
-                },
-                {
-                    title: "Authentication",
-                    url: "#",
-                },
-                {
-                    title: "Deploying",
-                    url: "#",
-                },
-                {
-                    title: "Upgrading",
-                    url: "#",
-                },
-                {
-                    title: "Examples",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "API Reference",
-            url: "#",
-            items: [
-                {
-                    title: "Components",
-                    url: "#",
-                },
-                {
-                    title: "File Conventions",
-                    url: "#",
-                },
-                {
-                    title: "Functions",
-                    url: "#",
-                },
-                {
-                    title: "next.config.js Options",
-                    url: "#",
-                },
-                {
-                    title: "CLI",
-                    url: "#",
-                },
-                {
-                    title: "Edge Runtime",
-                    url: "#",
-                },
-            ],
-        },
-        {
-            title: "Architecture",
-            url: "#",
-            items: [
-                {
-                    title: "Accessibility",
-                    url: "#",
-                },
-                {
-                    title: "Fast Refresh",
-                    url: "#",
-                },
-                {
-                    title: "Next.js Compiler",
-                    url: "#",
-                },
-                {
-                    title: "Supported Browsers",
-                    url: "#",
-                },
-                {
-                    title: "Turbopack",
-                    url: "#",
-                },
-            ],
-        },
-    ],
-}
+import { AppUser } from "@/components/app-user";
+import useBasicState from "@/states/basic";
+import { useShallow } from "zustand/react/shallow";
+import { useI18n } from "@/i18n";
+import { Link } from "react-router-dom";
+import { useLocation } from 'react-router-dom';
+
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+    const location = useLocation();
+    const [apps, mainNav] = useBasicState(useShallow((state) => [state.apps, state.mainNav]));
+    const sidebarI18n = useI18n("sidebar");
+    const isActive = (url: string) => {
+        return url === location.pathname;
+    }
+
     return (
         <Sidebar {...props}>
             <SidebarHeader>
                 <AppSwitcher
-                    apps={data.apps}
-                    defaultApp={data.apps[0]}
+                    apps={apps}
+                    defaultApp={apps[0]}
                 />
-                <SearchForm />
             </SidebarHeader>
             <SidebarContent>
-                {/* We create a SidebarGroup for each parent. */}
-                {data.navMain.map((item) => (
+                {mainNav.map((item) => (
                     <SidebarGroup key={item.title}>
-                        <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
+                        <SidebarGroupLabel>{<item.icon className="mr-1" />}{sidebarI18n(item.title)}</SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 {item.items.map((item) => (
                                     <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton asChild isActive={item.isActive}>
-                                            <a href={item.url}>{item.title}</a>
+                                        <SidebarMenuButton asChild isActive={isActive(item.url)}>
+                                            <Link to={item.url}>{sidebarI18n(item.title)}</Link>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
                                 ))}
@@ -177,7 +56,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarContent>
             <SidebarRail />
             <SidebarFooter>
-                <NavUser user={{
+                <AppUser user={{
                     name: "John Doe",
                     email: "john.doe@example.com",
                     avatar: "https://github.com/shadcn.png",

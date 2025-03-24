@@ -26,7 +26,7 @@ import {
     SidebarMenuItem,
     useSidebar,
 } from "@/components/ui/sidebar"
-export function NavUser({
+export function AppUser({
     user,
 }: {
     user: {
