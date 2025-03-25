@@ -3,5 +3,5 @@ export default function User() {
         <div>
             <h1>User</h1>
         </div>
-    )
+    );
 }

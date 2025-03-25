@@ -7,9 +7,7 @@ import {
     BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { Separator } from "@/components/ui/separator";
-import {
-    SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export default function AppHeader() {
     return (
@@ -30,5 +28,5 @@ export default function AppHeader() {
                 </BreadcrumbList>
             </Breadcrumb>
         </header>
-    )
+    );
 }

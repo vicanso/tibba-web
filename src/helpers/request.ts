@@ -66,7 +66,9 @@ request.interceptors.response.use(
             if (value) {
                 const use = Date.now() - Number(value);
                 if (use >= 0 && use < minUse) {
-                    await new Promise((resolve) => setTimeout(resolve, minUse - use));
+                    await new Promise((resolve) =>
+                        setTimeout(resolve, minUse - use),
+                    );
                 }
             }
         }

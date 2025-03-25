@@ -15,8 +15,7 @@ export function useI18n(namespace?: string) {
     return (key: string) => t(key);
 }
 
-i18n
-    .use(LanguageDetector)
+i18n.use(LanguageDetector)
     .use(initReactI18next)
     .init({
         fallbackLng: "en",

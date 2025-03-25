@@ -3,5 +3,5 @@ export default function LoginHistory() {
         <div>
             <h1>Login History</h1>
         </div>
-    )
+    );
 }

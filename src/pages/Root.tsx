@@ -1,11 +1,7 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import {
-    SidebarInset,
-    SidebarProvider,
-} from "@/components/ui/sidebar"
+import { AppSidebar } from "@/components/app-sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { Outlet } from "react-router-dom";
 import AppHeader from "@/components/app-header";
-
 
 export default function Root() {
     return (
@@ -18,5 +14,5 @@ export default function Root() {
                 </div>
             </SidebarInset>
         </SidebarProvider>
-    )
+    );
 }

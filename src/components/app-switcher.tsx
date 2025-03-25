@@ -1,37 +1,39 @@
-"use client"
-import * as React from "react"
-import { Check, ChevronsUpDown, GalleryVerticalEnd } from "lucide-react"
+"use client";
+import * as React from "react";
+import { Check, ChevronsUpDown, GalleryVerticalEnd } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu";
 import {
     SidebarMenu,
     SidebarMenuButton,
     SidebarMenuItem,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 export function AppSwitcher({
     apps,
     defaultApp,
 }: {
-    apps: string[]
-    defaultApp: string
+    apps: string[];
+    defaultApp: string;
 }) {
-    const [selectedApp, setSelectedApp] = React.useState(defaultApp)
+    const [selectedApp, setSelectedApp] = React.useState(defaultApp);
     if (apps.length <= 1) {
-        return <SidebarMenuButton
-            size="lg"
-            className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-        >
-            <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                <GalleryVerticalEnd className="size-4" />
-            </div>
-            <div className="flex flex-col gap-0.5 leading-none">
-                <span className="">{selectedApp}</span>
-            </div>
-        </SidebarMenuButton>
+        return (
+            <SidebarMenuButton
+                size="lg"
+                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+            >
+                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+                    <GalleryVerticalEnd className="size-4" />
+                </div>
+                <div className="flex flex-col gap-0.5 leading-none">
+                    <span className="">{selectedApp}</span>
+                </div>
+            </SidebarMenuButton>
+        );
     }
 
     return (
@@ -62,12 +64,14 @@ export function AppSwitcher({
                                 onSelect={() => setSelectedApp(app)}
                             >
                                 {app}{" "}
-                                {app === selectedApp && <Check className="ml-auto" />}
+                                {app === selectedApp && (
+                                    <Check className="ml-auto" />
+                                )}
                             </DropdownMenuItem>
                         ))}
                     </DropdownMenuContent>
                 </DropdownMenu>
             </SidebarMenuItem>
         </SidebarMenu>
-    )
+    );
 }

@@ -1,7 +1,5 @@
 import { create } from "zustand";
-import {
-    Users,
-} from "lucide-react";
+import { Users } from "lucide-react";
 import { USER, LOGIN_HISTORY } from "@/constants/route";
 const mainNav = [
     {
@@ -21,11 +19,9 @@ const mainNav = [
     },
 ];
 
-
 const useBasicState = create(() => ({
     apps: ["Tibba Web", "Tibba Admin"],
     mainNav,
 }));
-
 
 export default useBasicState;
