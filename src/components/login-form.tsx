@@ -27,16 +27,14 @@ export function LoginForm({
     const location = useLocation();
     const i18nLogin = useI18n("login");
     const defaultAccount = location.state?.account || "";
-    const [account, setAccount] = useState("");
+    const [account, setAccount] = useState(defaultAccount);
     const [password, setPassword] = useState("");
     const [captcha, setCaptcha] = useState("");
     const [processing, setProcessing] = useState(false);
     const [login] = useUserState(useShallow((state) => [state.login]));
 
     const canSubmit = () => {
-        return (
-            account && password && captcha
-        );
+        return account && password && captcha;
     };
 
     const handleLogin = async () => {
@@ -53,7 +51,6 @@ export function LoginForm({
             setProcessing(false);
         }
     };
-
 
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
@@ -118,14 +115,21 @@ export function LoginForm({
                                         {i18nLogin("captcha")}
                                     </Label>
                                 </div>
-                                <Captcha onChange={(value) => {
-                                    setCaptcha(value);
-                                }} />
+                                <Captcha
+                                    onChange={(id, value) => {
+                                        setCaptcha(`${id}:${value}`);
+                                    }}
+                                />
                             </div>
-                            <Button type="submit" className="w-full" disabled={!canSubmit()} onClick={(e) => {
-                                e.preventDefault();
-                                handleLogin();
-                            }}>
+                            <Button
+                                type="submit"
+                                className="w-full"
+                                disabled={!canSubmit()}
+                                onClick={(e) => {
+                                    e.preventDefault();
+                                    handleLogin();
+                                }}
+                            >
                                 {i18nLogin("submit")}
                             </Button>
                         </div>

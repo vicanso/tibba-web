@@ -1,4 +1,3 @@
-
 import { cn } from "@/lib/utils";
 import {
     InputOTP,
@@ -14,8 +13,7 @@ import { formatError } from "@/helpers/util";
 
 interface CaptchaProps {
     className?: string;
-    level?: number;
-    onChange: (value: string) => void;
+    onChange: (id: string, value: string) => void;
 }
 
 export function Captcha({ className, onChange }: CaptchaProps) {
@@ -46,15 +44,17 @@ export function Captcha({ className, onChange }: CaptchaProps) {
     useAsync(refreshCaptcha, []);
 
     return (
-
         <div className={cn("flex items-center gap-2", className)}>
-            <InputOTP maxLength={4} onChange={(value) => {
-                if (captcha.id) {
-                    onChange(`${captcha.id}:${value}`);
-                } else {
-                    onChange("");
-                }
-            }}>
+            <InputOTP
+                maxLength={4}
+                onChange={(value) => {
+                    if (captcha.id) {
+                        onChange(captcha.id, value);
+                    } else {
+                        onChange("", "");
+                    }
+                }}
+            >
                 <InputOTPGroup>
                     <InputOTPSlot index={0} />
                     <InputOTPSlot index={1} />

@@ -63,13 +63,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             </SidebarContent>
             <SidebarRail />
             <SidebarFooter>
-                <AppUser
-                    user={{
-                        name: "John Doe",
-                        email: "john.doe@example.com",
-                        avatar: "https://github.com/shadcn.png",
-                    }}
-                />
+                <AppUser />
             </SidebarFooter>
         </Sidebar>
     );

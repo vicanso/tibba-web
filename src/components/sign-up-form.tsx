@@ -31,9 +31,7 @@ export function SignUpForm({
     const [processing, setProcessing] = useState(false);
     const [signUp] = useUserState(useShallow((state) => [state.signUp]));
     const canSubmit = () => {
-        return (
-            account !== "" || password !== "" || password == confirmPassword
-        );
+        return account && password && password == confirmPassword;
     };
     const handleSignUp = async () => {
         if (processing) {
