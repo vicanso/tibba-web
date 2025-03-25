@@ -10,14 +10,51 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
-import { Link } from "react-router-dom";
-import { SIGN_UP } from "@/constants/route";
+import { Link, useLocation } from "react-router-dom";
+import { HOME, SIGN_UP } from "@/constants/route";
+import { Captcha } from "@/components/captcha";
+import { useState } from "react";
+import useUserState from "@/states/user";
+import { toast } from "sonner";
+import { formatError } from "@/helpers/util";
+import { useShallow } from "zustand/react/shallow";
+import router from "@/routers";
 
 export function LoginForm({
     className,
     ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+    const location = useLocation();
     const i18nLogin = useI18n("login");
+    const defaultAccount = location.state?.account || "";
+    const [account, setAccount] = useState("");
+    const [password, setPassword] = useState("");
+    const [captcha, setCaptcha] = useState("");
+    const [processing, setProcessing] = useState(false);
+    const [login] = useUserState(useShallow((state) => [state.login]));
+
+    const canSubmit = () => {
+        return (
+            account && password && captcha
+        );
+    };
+
+    const handleLogin = async () => {
+        if (processing) {
+            return;
+        }
+        setProcessing(true);
+        try {
+            await login(account, password, captcha);
+            router.navigate(HOME);
+        } catch (err) {
+            toast.error(formatError(err));
+        } finally {
+            setProcessing(false);
+        }
+    };
+
+
     return (
         <div className={cn("flex flex-col gap-6", className)} {...props}>
             <Card>
@@ -41,6 +78,11 @@ export function LoginForm({
                                     placeholder={i18nLogin(
                                         "accountPlaceholder",
                                     )}
+                                    autoFocus={!defaultAccount}
+                                    defaultValue={defaultAccount}
+                                    onChange={(e) => {
+                                        setAccount(e.target.value);
+                                    }}
                                     required
                                 />
                             </div>
@@ -50,6 +92,7 @@ export function LoginForm({
                                         {i18nLogin("password")}
                                     </Label>
                                     <a
+                                        tabIndex={-1}
                                         href="#"
                                         className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                                     >
@@ -59,13 +102,30 @@ export function LoginForm({
                                 <Input
                                     id="password"
                                     type="password"
+                                    autoFocus={defaultAccount != ""}
                                     required
                                     placeholder={i18nLogin(
                                         "passwordPlaceholder",
                                     )}
+                                    onChange={(e) => {
+                                        setPassword(e.target.value);
+                                    }}
                                 />
                             </div>
-                            <Button type="submit" className="w-full">
+                            <div className="grid gap-2">
+                                <div className="flex items-center">
+                                    <Label htmlFor="captcha">
+                                        {i18nLogin("captcha")}
+                                    </Label>
+                                </div>
+                                <Captcha onChange={(value) => {
+                                    setCaptcha(value);
+                                }} />
+                            </div>
+                            <Button type="submit" className="w-full" disabled={!canSubmit()} onClick={(e) => {
+                                e.preventDefault();
+                                handleLogin();
+                            }}>
                                 {i18nLogin("submit")}
                             </Button>
                         </div>

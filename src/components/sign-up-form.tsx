@@ -18,6 +18,7 @@ import { toast } from "sonner";
 import { formatError } from "@/helpers/util";
 import useUserState from "@/states/user";
 import { useShallow } from "zustand/react/shallow";
+import router from "@/routers";
 
 export function SignUpForm({
     className,
@@ -28,10 +29,10 @@ export function SignUpForm({
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [processing, setProcessing] = useState(false);
-    const [register] = useUserState(useShallow((state) => [state.register]));
+    const [signUp] = useUserState(useShallow((state) => [state.signUp]));
     const canSubmit = () => {
         return (
-            account === "" || password === "" || password !== confirmPassword
+            account !== "" || password !== "" || password == confirmPassword
         );
     };
     const handleSignUp = async () => {
@@ -40,8 +41,13 @@ export function SignUpForm({
         }
         setProcessing(true);
         try {
-            await register(account, password);
+            await signUp(account, password);
             toast.success(i18nSignUp("success"));
+            router.navigate(LOGIN, {
+                state: {
+                    account,
+                },
+            });
         } catch (err) {
             toast.error(formatError(err));
         } finally {
@@ -69,6 +75,7 @@ export function SignUpForm({
                                 </Label>
                                 <Input
                                     id="account"
+                                    autoFocus
                                     placeholder={i18nSignUp(
                                         "accountPlaceholder",
                                     )}
@@ -118,7 +125,7 @@ export function SignUpForm({
                             <Button
                                 type="submit"
                                 className="w-full"
-                                disabled={canSubmit()}
+                                disabled={!canSubmit()}
                                 onClick={handleSignUp}
                             >
                                 {processing && (

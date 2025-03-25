@@ -16,6 +16,7 @@ const login = {
     forgotPassword: "Forgot your password?",
     submit: "Login",
     dontHaveAccount: "Don't have an account?",
+    captcha: "Captcha",
     signUp: "Sign up",
 };
 const signUp = {
