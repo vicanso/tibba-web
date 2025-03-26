@@ -233,15 +233,15 @@ export function AppUser() {
                         <DropdownMenuSeparator />
                         {renderLanguage()}
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem disabled>
                             <UserCircleIcon />
                             Account
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem disabled>
                             <CreditCardIcon />
                             Billing
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem disabled>
                             <BellIcon />
                             Notifications
                         </DropdownMenuItem>
@@ -249,7 +249,7 @@ export function AppUser() {
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
                         <LogOutIcon />
-                        Log out
+                        {appUserI18n("logout")}
                     </DropdownMenuItem>
                 </DropdownMenuContent>
             </DropdownMenu>

@@ -37,8 +37,8 @@ const appUser = {
     themeSystem: "System Theme",
     themeDark: "Dark Theme",
     themeLight: "Light Theme",
-    login: "Login",
-    logout: "Logout",
+    login: "Log In",
+    logout: "Log Out",
 };
 
 export default {

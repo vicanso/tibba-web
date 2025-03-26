@@ -4,7 +4,7 @@ import { RouterProvider } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
 import router from "@/routers";
 
-export default function Home() {
+export default function App() {
     return (
         <React.StrictMode>
             <ThemeProvider storageKey="vite-ui-theme">
