@@ -33,10 +33,18 @@ const signUp = {
     login: "Login",
     success: "Sign up successfully, please login",
 };
+const appUser = {
+    themeSystem: "System Theme",
+    themeDark: "Dark Theme",
+    themeLight: "Light Theme",
+    login: "Login",
+    logout: "Logout",
+};
 
 export default {
     common,
     sidebar,
     login,
     signUp,
+    appUser,
 };

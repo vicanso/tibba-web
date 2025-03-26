@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { formatError } from "@/helpers/util";
 import { useShallow } from "zustand/react/shallow";
 import router from "@/routers";
+import { nanoid } from "nanoid";
 
 export function LoginForm({
     className,
@@ -32,7 +33,7 @@ export function LoginForm({
     const [captcha, setCaptcha] = useState("");
     const [processing, setProcessing] = useState(false);
     const [login] = useUserState(useShallow((state) => [state.login]));
-
+    const [captchaId, setCaptchaId] = useState(nanoid());
     const canSubmit = () => {
         return account && password && captcha;
     };
@@ -47,6 +48,7 @@ export function LoginForm({
             router.navigate(HOME);
         } catch (err) {
             toast.error(formatError(err));
+            setCaptchaId(nanoid());
         } finally {
             setProcessing(false);
         }
@@ -116,6 +118,7 @@ export function LoginForm({
                                     </Label>
                                 </div>
                                 <Captcha
+                                    key={captchaId}
                                     onChange={(id, value) => {
                                         setCaptcha(`${id}:${value}`);
                                     }}
