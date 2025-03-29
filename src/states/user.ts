@@ -8,6 +8,7 @@ import {
     USER_LOGOUT,
     USER_ME,
     USER_REGISTER,
+    USER_PROFILE,
 } from "@/constants/url";
 
 interface User {
@@ -18,6 +19,8 @@ interface User {
     can_renew: boolean;
     email?: string;
     avatar?: string;
+    roles?: string[];
+    groups?: string[];
 }
 
 interface UserState {
@@ -31,6 +34,12 @@ interface UserState {
         captcha: string,
     ) => Promise<void>;
     logout: () => Promise<void>;
+    updateProfile: (profile: {
+        email?: string;
+        avatar?: string;
+        roles?: string[];
+        groups?: string[];
+    }) => Promise<void>;
 }
 
 const defaultUser: User = {
@@ -91,6 +100,14 @@ const useUserState = create<UserState>((set) => ({
             initialized: true,
             data: defaultUser,
         });
+    },
+    updateProfile: async (profile: {
+        email?: string;
+        avatar?: string;
+        roles?: string[];
+        groups?: string[];
+    }) => {
+        await request.patch(USER_PROFILE, profile);
     },
 }));
 

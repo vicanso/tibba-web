@@ -39,6 +39,21 @@ const appUser = {
     themeLight: "Light Theme",
     login: "Log In",
     logout: "Log Out",
+    profile: "Profile",
+};
+
+const profile = {
+    title: "Profile",
+    email: "Email",
+    emailPlaceholder: "Please input your email",
+    avatar: "Avatar",
+    avatarPlaceholder: "Please input your avatar",
+    roles: "Roles",
+    rolesPlaceholder: "Please select your roles",
+    groups: "Groups",
+    groupsPlaceholder: "Please select your groups",
+    submit: "Update profile",
+    updateSuccess: "Update profile successfully",
 };
 
 export default {
@@ -47,4 +62,5 @@ export default {
     login,
     signUp,
     appUser,
+    profile,
 };

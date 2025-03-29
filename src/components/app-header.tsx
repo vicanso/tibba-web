@@ -29,11 +29,13 @@ export default function AppHeader() {
                 );
                 return;
             }
-            items.push(
-                <BreadcrumbItem key={item.url}>
-                    <Link to={item.url}>{item.title}</Link>
-                </BreadcrumbItem>,
-            );
+            if (item.url) {
+                items.push(
+                    <BreadcrumbItem key={item.url}>
+                        <Link to={item.url}>{item.title}</Link>
+                    </BreadcrumbItem>,
+                );
+            }
             if (index !== count - 1) {
                 items.push(
                     <BreadcrumbSeparator

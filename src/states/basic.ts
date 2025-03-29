@@ -24,7 +24,7 @@ const mainNav = [
 ];
 
 export interface PageNavigation {
-    url: string;
+    url?: string;
     title: string;
 }
 

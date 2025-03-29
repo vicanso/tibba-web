@@ -38,7 +38,7 @@ import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import { formatError } from "@/helpers/util";
 import { Link } from "react-router-dom";
-import { LOGIN } from "@/constants/route";
+import { LOGIN, PROFILE } from "@/constants/route";
 import { useState } from "react";
 import { useTheme } from "@/components/theme-provider";
 import i18n from "@/i18n";
@@ -229,13 +229,11 @@ export function AppUser() {
                     </DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                        {renderTheme()}
-                        <DropdownMenuSeparator />
-                        {renderLanguage()}
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem disabled>
-                            <UserCircleIcon />
-                            Account
+                        <DropdownMenuItem asChild>
+                            <Link to={PROFILE} className="cursor-pointer">
+                                <UserCircleIcon />
+                                {appUserI18n("profile")}
+                            </Link>
                         </DropdownMenuItem>
                         <DropdownMenuItem disabled>
                             <CreditCardIcon />
@@ -245,9 +243,16 @@ export function AppUser() {
                             <BellIcon />
                             Notifications
                         </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        {renderTheme()}
+                        <DropdownMenuSeparator />
+                        {renderLanguage()}
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
+                    <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="cursor-pointer"
+                    >
                         <LogOutIcon />
                         {appUserI18n("logout")}
                     </DropdownMenuItem>
