@@ -17,8 +17,8 @@ import useUserState from "@/states/user";
 import { Loading } from "@/components/loading";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n";
-import { formatError } from "@/helpers/util";
-import { MultiSelect } from "./multi-select";
+import { formatError, getDirtyValues, DirtyFields } from "@/helpers/util";
+import { MultiSelect } from "@/components/multi-select";
 import { Loader2Icon } from "lucide-react";
 
 const profileFormSchema = z.object({
@@ -33,21 +33,6 @@ const profileFormSchema = z.object({
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
-
-type DirtyFields<T> = {
-    [K in keyof T]?: boolean;
-};
-
-function getDirtyValues<T extends object>(
-    dirtyFields: DirtyFields<T>,
-    allValues: T,
-): Partial<T> {
-    return Object.keys(dirtyFields).reduce((acc, key) => {
-        const typedKey = key as keyof T;
-        acc[typedKey] = allValues[typedKey];
-        return acc;
-    }, {} as Partial<T>);
-}
 
 export function ProfileForm() {
     const profileI18n = useI18n("profile");
@@ -83,7 +68,7 @@ export function ProfileForm() {
     }, [initialized, user, form]);
 
     async function onSubmit(data: ProfileFormValues) {
-        if (processing) {
+        if (processing || !form.formState.isDirty) {
             return;
         }
         setProcessing(true);
@@ -154,19 +139,9 @@ export function ProfileForm() {
                         <FormItem>
                             <FormLabel>{profileI18n("roles")}</FormLabel>
                             <FormControl>
-                                <MultiSelect
-                                    options={[
-                                        {
-                                            label: "Su",
-                                            value: "su",
-                                        },
-                                        {
-                                            label: "Admin",
-                                            value: "admin",
-                                        },
-                                    ]}
-                                    selected={field.value ?? []}
-                                    onChange={field.onChange}
+                                <Input
+                                    disabled={true}
+                                    value={field.value?.join(", ")}
                                 />
                             </FormControl>
                             <FormMessage />
@@ -180,23 +155,9 @@ export function ProfileForm() {
                         <FormItem>
                             <FormLabel>{profileI18n("groups")}</FormLabel>
                             <FormControl>
-                                <MultiSelect
-                                    options={[
-                                        {
-                                            label: "IT",
-                                            value: "it",
-                                        },
-                                        {
-                                            label: "Sales",
-                                            value: "sales",
-                                        },
-                                        {
-                                            label: "Marketing",
-                                            value: "marketing",
-                                        },
-                                    ]}
-                                    selected={field.value ?? []}
-                                    onChange={field.onChange}
+                                <Input
+                                    disabled={true}
+                                    value={field.value?.join(", ")}
                                 />
                             </FormControl>
                             <FormMessage />

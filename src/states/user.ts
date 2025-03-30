@@ -9,6 +9,7 @@ import {
     USER_ME,
     USER_REGISTER,
     USER_PROFILE,
+    USER_REFRESH,
 } from "@/constants/url";
 
 interface User {
@@ -34,6 +35,7 @@ interface UserState {
         captcha: string,
     ) => Promise<void>;
     logout: () => Promise<void>;
+    refresh: () => Promise<void>;
     updateProfile: (profile: {
         email?: string;
         avatar?: string;
@@ -108,6 +110,9 @@ const useUserState = create<UserState>((set) => ({
         groups?: string[];
     }) => {
         await request.patch(USER_PROFILE, profile);
+    },
+    refresh: async () => {
+        await request.patch(USER_REFRESH);
     },
 }));
 

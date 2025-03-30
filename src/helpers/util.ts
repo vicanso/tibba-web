@@ -65,3 +65,18 @@ export function today(): Date {
 export function tomorrow(): Date {
     return new Date(today().getTime() + oneDayMS);
 }
+
+export type DirtyFields<T> = {
+    [K in keyof T]?: boolean;
+};
+
+export function getDirtyValues<T extends object>(
+    dirtyFields: DirtyFields<T>,
+    allValues: T,
+): Partial<T> {
+    return Object.keys(dirtyFields).reduce((acc, key) => {
+        const typedKey = key as keyof T;
+        acc[typedKey] = allValues[typedKey];
+        return acc;
+    }, {} as Partial<T>);
+}

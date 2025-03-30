@@ -19,20 +19,29 @@ export default function AppHeader() {
     const renderBreadcrumb = () => {
         const count = pageHeaderNavigation.length;
         const items: React.ReactNode[] = [];
-
         pageHeaderNavigation.forEach((item, index) => {
+            const key = `${item.url}-${index}-${item.title}`;
             if (index === count - 1) {
                 items.push(
-                    <BreadcrumbItem key={item.url}>
-                        <BreadcrumbPage>{item.title}</BreadcrumbPage>
+                    <BreadcrumbItem key={key}>
+                        <BreadcrumbPage className="flex items-center gap-2">
+                            {item.icon}
+                            {item.title}
+                        </BreadcrumbPage>
                     </BreadcrumbItem>,
                 );
                 return;
             }
             if (item.url) {
                 items.push(
-                    <BreadcrumbItem key={item.url}>
-                        <Link to={item.url}>{item.title}</Link>
+                    <BreadcrumbItem
+                        key={key}
+                        className="flex items-center gap-2"
+                    >
+                        <Link to={item.url}>
+                            {item.icon}
+                            {item.title}
+                        </Link>
                     </BreadcrumbItem>,
                 );
             }
@@ -40,7 +49,7 @@ export default function AppHeader() {
                 items.push(
                     <BreadcrumbSeparator
                         className="hidden md:block"
-                        key={item.url + "separator"}
+                        key={key + "separator"}
                     />,
                 );
             }

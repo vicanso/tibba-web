@@ -25,6 +25,7 @@ const mainNav = [
 
 export interface PageNavigation {
     url?: string;
+    icon?: React.JSX.Element;
     title: string;
 }
 
@@ -36,12 +37,22 @@ interface BasicState {
     pageHeaderNavigation: PageNavigation[];
     setPageHeaderNavigation: (nav: PageNavigation[]) => void;
     resetPageHeaderNavigation: () => void;
+    setTitle: (title: string) => void;
 }
 
 const useBasicState = create<BasicState>((set) => ({
     apps: ["Tibba Web", "Tibba Admin"],
     mainNav,
     pageHeaderNavigation,
+    setTitle: (title: string) => {
+        set({
+            pageHeaderNavigation: [
+                {
+                    title,
+                },
+            ],
+        });
+    },
     setPageHeaderNavigation: (nav: PageNavigation[]) => {
         set({
             pageHeaderNavigation: nav,

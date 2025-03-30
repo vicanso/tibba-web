@@ -24,21 +24,24 @@ export function MultiSelect({
     options,
     selected,
     onChange,
+    disabled,
 }: {
     options: Option[];
     selected: string[];
+    disabled?: boolean;
     onChange: (values: string[]) => void;
 }) {
     const [open, setOpen] = React.useState(false);
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={disabled ? false : open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <div className="border rounded-md p-2 flex flex-wrap gap-1">
                     {selected.map((value) => (
                         <Badge key={value} variant="secondary">
                             {options.find((opt) => opt.value === value)?.label}
                             <button
+                                disabled={disabled}
                                 className="ml-1"
                                 onClick={(e) => {
                                     e.stopPropagation();

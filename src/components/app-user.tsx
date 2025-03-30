@@ -42,6 +42,7 @@ import { LOGIN, PROFILE } from "@/constants/route";
 import { useState } from "react";
 import { useTheme } from "@/components/theme-provider";
 import i18n from "@/i18n";
+import dayjs from "dayjs";
 
 export function AppUser() {
     const [processing, setProcessing] = useState(false);
@@ -50,12 +51,13 @@ export function AppUser() {
 
     const commonI18n = useI18n("common");
     const appUserI18n = useI18n("appUser");
-    const [initialized, fetch, userInfo, logout] = useUserState(
+    const [initialized, fetch, userInfo, logout, refresh] = useUserState(
         useShallow((state) => [
             state.initialized,
             state.fetch,
             state.data,
             state.logout,
+            state.refresh,
         ]),
     );
 
@@ -75,7 +77,17 @@ export function AppUser() {
 
     useAsync(async () => {
         try {
-            await fetch();
+            const user = await fetch();
+            if (user.account && user.can_renew) {
+                const expiredAt = dayjs(user.expired_at);
+                const offset = 24 * 3600 * 1000;
+                if (expiredAt.valueOf() - Date.now() < offset) {
+                    // refresh session
+                    refresh().catch((err) => {
+                        console.error(err);
+                    });
+                }
+            }
         } catch (err) {
             toast.error(formatError(err));
         }
