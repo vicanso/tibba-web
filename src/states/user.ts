@@ -1,6 +1,8 @@
 import { create } from "zustand";
 import request from "@/helpers/request";
 import sha256 from "crypto-js/sha256";
+import { Users, LucideIcon } from "lucide-react";
+import { HOME, USER, LOGIN_HISTORY } from "@/constants/route";
 
 import {
     USER_LOGIN,
@@ -12,7 +14,7 @@ import {
     USER_REFRESH,
 } from "@/constants/url";
 
-interface User {
+interface UserSession {
     account: string;
     expired_at: string;
     issued_at: string;
@@ -24,16 +26,60 @@ interface User {
     groups?: string[];
 }
 
+// 导航菜单项接口
+interface NavItem {
+    title: string;
+    url: string;
+    disabled?: boolean;
+    roles?: string[];
+}
+
+// 导航组接口
+interface NavGroup {
+    title: string;
+    icon: LucideIcon; // 使用 LucideIcon 类型
+    url: string;
+    items: NavItem[];
+}
+
+const defaultMainNav = [
+    {
+        title: "userFeature",
+        icon: Users,
+        url: "#",
+        items: [
+            {
+                title: "HOME",
+                url: HOME,
+                disabled: true,
+            },
+            {
+                title: "user",
+                url: USER,
+                roles: ["su", "admin"],
+                disabled: true,
+            },
+            {
+                title: "loginHistory",
+                url: LOGIN_HISTORY,
+                roles: ["su", "admin"],
+                disabled: true,
+            },
+        ],
+    },
+];
+
 interface UserState {
-    data: User;
+    data: UserSession;
     initialized: boolean;
-    fetch: () => Promise<User>;
+    mainNav: NavGroup[];
+    fetch: () => Promise<UserSession>;
     signUp: (account: string, password: string) => Promise<void>;
     login: (
         account: string,
         password: string,
         captcha: string,
-    ) => Promise<void>;
+    ) => Promise<UserSession>;
     logout: () => Promise<void>;
     refresh: () => Promise<void>;
     updateProfile: (profile: {
@@ -44,7 +90,7 @@ interface UserState {
     }) => Promise<void>;
 }
 
-const defaultUser: User = {
+const defaultUser: UserSession = {
     account: "",
     expired_at: "",
     issued_at: "",
@@ -55,8 +101,9 @@ const defaultUser: User = {
 const useUserState = create<UserState>((set) => ({
     data: defaultUser,
     initialized: false,
+    mainNav: defaultMainNav,
     fetch: async () => {
-        const { data } = await request.get<User>(USER_ME);
+        const { data } = await request.get<UserSession>(USER_ME);
         set({
             initialized: true,
             data,
@@ -76,7 +123,7 @@ const useUserState = create<UserState>((set) => ({
             token: string;
         }>(USER_LOGIN_TOKEN);
         const msg = `${data.hash}:${sha256(password).toString()}`;
-        const { data: user } = await request.post<User>(
+        const { data: user } = await request.post<UserSession>(
             USER_LOGIN,
             {
                 ts: data.ts,
@@ -91,10 +138,24 @@ const useUserState = create<UserState>((set) => ({
                 },
             },
         );
+        const nav = defaultMainNav.slice(0);
+        nav.map((item) => {
+            item.items.forEach((item) => {
+                if (item.roles) {
+                    item.disabled = !item.roles.some((role) =>
+                        user.roles?.includes(role),
+                    );
+                } else {
+                    item.disabled = false;
+                }
+            });
+        });
         set({
             initialized: true,
             data: user,
+            mainNav: nav,
         });
+        return user;
     },
     logout: async () => {
         await request.delete(USER_LOGOUT);

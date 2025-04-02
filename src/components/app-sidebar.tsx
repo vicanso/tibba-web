@@ -19,12 +19,13 @@ import { useShallow } from "zustand/react/shallow";
 import { useI18n } from "@/i18n";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
-
+import useUserState from "@/states/user";
+import { useEffect } from "react";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const location = useLocation();
-    const [apps, mainNav] = useBasicState(
-        useShallow((state) => [state.apps, state.mainNav]),
-    );
+    const [apps] = useBasicState(useShallow((state) => [state.apps]));
+    const [mainNav] = useUserState(useShallow((state) => [state.mainNav]));
+
     const sidebarI18n = useI18n("sidebar");
     const isActive = (url: string) => {
         return url === location.pathname;
@@ -44,18 +45,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                {item.items.map((item) => (
-                                    <SidebarMenuItem key={item.title}>
-                                        <SidebarMenuButton
-                                            asChild
-                                            isActive={isActive(item.url)}
-                                        >
-                                            <Link to={item.url}>
-                                                {sidebarI18n(item.title)}
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                ))}
+                                {item.items
+                                    .filter((item) => !item.disabled)
+                                    .map((item) => (
+                                        <SidebarMenuItem key={item.title}>
+                                            <SidebarMenuButton
+                                                asChild
+                                                isActive={isActive(item.url)}
+                                            >
+                                                <Link to={item.url}>
+                                                    {sidebarI18n(item.title)}
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    ))}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>

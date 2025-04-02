@@ -18,7 +18,6 @@ import { Loading } from "@/components/loading";
 import { useEffect, useState } from "react";
 import { useI18n } from "@/i18n";
 import { formatError, getDirtyValues, DirtyFields } from "@/helpers/util";
-import { MultiSelect } from "@/components/multi-select";
 import { Loader2Icon } from "lucide-react";
 
 const profileFormSchema = z.object({
