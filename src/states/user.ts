@@ -12,6 +12,7 @@ import {
     USER_REGISTER,
     USER_PROFILE,
     USER_REFRESH,
+    USER_LIST,
 } from "@/constants/url";
 
 interface UserSession {
@@ -42,32 +43,61 @@ interface NavGroup {
     items: NavItem[];
 }
 
-const defaultMainNav = [
-    {
-        title: "userFeature",
-        icon: Users,
-        url: "#",
-        items: [
-            {
-                title: "HOME",
-                url: HOME,
-                disabled: true,
-            },
-            {
-                title: "user",
-                url: USER,
-                roles: ["su", "admin"],
-                disabled: true,
-            },
-            {
-                title: "loginHistory",
-                url: LOGIN_HISTORY,
-                roles: ["su", "admin"],
-                disabled: true,
-            },
-        ],
-    },
-];
+
+function getMainNav(roles: string[]) {
+    const defaultMainNav: NavGroup[] = [
+        {
+            title: "userFeature",
+            icon: Users,
+            url: "#",
+            items: [
+                {
+                    title: "HOME",
+                    url: HOME,
+                },
+                {
+                    title: "user",
+                    url: USER,
+                    roles: ["su", "admin"],
+                },
+                {
+                    title: "loginHistory",
+                    url: LOGIN_HISTORY,
+                    roles: ["su", "admin"],
+                },
+            ],
+        },
+    ];
+    const result: NavGroup[] = [];
+    defaultMainNav.forEach((nav) => {
+        const items = nav.items.filter((item) => {
+            if (item.roles) {
+                return item.roles.some((role) =>
+                    roles.includes(role),
+                );
+            }
+            return true;
+        });
+        if (items.length > 0) {
+            nav.items = items;
+            result.push(nav);
+        }
+    });
+    return result
+}
+
+interface User {
+    id: number;
+    account: string;
+    avatar: string | null;
+    created: string;
+    email: string | null;
+    groups: string[] | null;
+    modified: string;
+    remark: string | null;
+    roles: string[] | null;
+    status: number;
+}
 
 interface UserState {
     data: UserSession;
@@ -88,6 +118,14 @@ interface UserState {
         roles?: string[];
         groups?: string[];
     }) => Promise<void>;
+    list: (params: {
+        page: number;
+        limit: number;
+        keyword?: string;
+    }) => Promise<{
+        count: number;
+        users: User[];
+    }>;
 }
 
 const defaultUser: UserSession = {
@@ -101,14 +139,15 @@ const defaultUser: UserSession = {
 const useUserState = create<UserState>((set) => ({
     data: defaultUser,
     initialized: false,
-    mainNav: defaultMainNav,
+    mainNav: [],
     fetch: async () => {
-        const { data } = await request.get<UserSession>(USER_ME);
+        const { data: user } = await request.get<UserSession>(USER_ME);
         set({
             initialized: true,
-            data,
+            data: user,
+            mainNav: getMainNav(user.roles || []),
         });
-        return data;
+        return user;
     },
     signUp: async (account: string, password: string) => {
         await request.post(USER_REGISTER, {
@@ -123,7 +162,9 @@ const useUserState = create<UserState>((set) => ({
             token: string;
         }>(USER_LOGIN_TOKEN);
         const msg = `${data.hash}:${sha256(password).toString()}`;
-        const { data: user } = await request.post<UserSession>(
+        const {
+            data: user
+        } = await request.post<UserSession>(
             USER_LOGIN,
             {
                 ts: data.ts,
@@ -138,22 +179,10 @@ const useUserState = create<UserState>((set) => ({
                 },
             },
         );
-        const nav = defaultMainNav.slice(0);
-        nav.map((item) => {
-            item.items.forEach((item) => {
-                if (item.roles) {
-                    item.disabled = !item.roles.some((role) =>
-                        user.roles?.includes(role),
-                    );
-                } else {
-                    item.disabled = false;
-                }
-            });
-        });
         set({
             initialized: true,
             data: user,
-            mainNav: nav,
+            mainNav: getMainNav(user.roles || []),
         });
         return user;
     },
@@ -162,6 +191,7 @@ const useUserState = create<UserState>((set) => ({
         set({
             initialized: true,
             data: defaultUser,
+            mainNav: [],
         });
     },
     updateProfile: async (profile: {
@@ -174,6 +204,19 @@ const useUserState = create<UserState>((set) => ({
     },
     refresh: async () => {
         await request.patch(USER_REFRESH);
+    },
+    list: async (params: {
+        page: number;
+        limit: number;
+        keyword?: string;
+    }) => {
+        const { data } = await request.get<{
+            count: number;
+            users: User[];
+        }>(USER_LIST, {
+            params,
+        });
+        return data;
     },
 }));
 

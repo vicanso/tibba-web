@@ -20,11 +20,11 @@ import { useI18n } from "@/i18n";
 import { Link } from "react-router-dom";
 import { useLocation } from "react-router-dom";
 import useUserState from "@/states/user";
-import { useEffect } from "react";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const location = useLocation();
     const [apps] = useBasicState(useShallow((state) => [state.apps]));
     const [mainNav] = useUserState(useShallow((state) => [state.mainNav]));
+
 
     const sidebarI18n = useI18n("sidebar");
     const isActive = (url: string) => {
@@ -46,7 +46,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 {item.items
-                                    .filter((item) => !item.disabled)
                                     .map((item) => (
                                         <SidebarMenuItem key={item.title}>
                                             <SidebarMenuButton
