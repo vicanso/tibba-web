@@ -48,7 +48,6 @@ export default function User() {
         }
     };
 
-
     useEffect(() => {
         setPageHeaderNavigation([
             {

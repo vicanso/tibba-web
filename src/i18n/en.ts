@@ -5,6 +5,8 @@ const sidebar = {
     userFeature: "User",
     user: "User",
     loginHistory: "Login History",
+    modelFeature: "Model",
+    file: "File",
 };
 const login = {
     title: "Login",

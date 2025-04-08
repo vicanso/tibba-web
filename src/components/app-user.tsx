@@ -209,7 +209,7 @@ export function AppUser() {
             <Button variant="outline" size="lg" className="w-full">
                 <Link
                     to={LOGIN}
-                    className="w-full flex items-center justify-center gap-2"
+                    className="w-full h-full flex items-center justify-center gap-2"
                 >
                     <LogInIcon />
                     {appUserI18n("login")}
@@ -222,7 +222,7 @@ export function AppUser() {
                 <DropdownMenuTrigger asChild>
                     <SidebarMenuButton
                         size="lg"
-                        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                        className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground cursor-pointer"
                     >
                         {renderUser("grayscale")}
                         <MoreVerticalIcon className="ml-auto size-4" />

@@ -6,6 +6,7 @@ import LoginHistory from "@/pages/LoginHistory";
 import Login from "@/pages/Login";
 import SignUp from "@/pages/SignUp";
 import Profile from "@/pages/Profile";
+import Model from "@/pages/Model";
 
 import {
     USER,
@@ -14,6 +15,7 @@ import {
     LOGIN,
     SIGN_UP,
     PROFILE,
+    MODEL,
 } from "@/constants/route";
 
 const router = createHashRouter([
@@ -44,6 +46,10 @@ const router = createHashRouter([
             {
                 path: PROFILE,
                 element: <Profile />,
+            },
+            {
+                path: MODEL,
+                element: <Model />,
             },
         ],
     },

@@ -1,8 +1,8 @@
 import { create } from "zustand";
 import request from "@/helpers/request";
 import sha256 from "crypto-js/sha256";
-import { Users, LucideIcon } from "lucide-react";
-import { HOME, USER, LOGIN_HISTORY } from "@/constants/route";
+import { Users, LucideIcon, ComponentIcon } from "lucide-react";
+import { HOME, USER, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
 import {
     USER_LOGIN,
@@ -43,7 +43,6 @@ interface NavGroup {
     items: NavItem[];
 }
 
-
 function getMainNav(roles: string[]) {
     const defaultMainNav: NavGroup[] = [
         {
@@ -67,14 +66,23 @@ function getMainNav(roles: string[]) {
                 },
             ],
         },
+        {
+            title: "modelFeature",
+            icon: ComponentIcon,
+            url: "#",
+            items: [
+                {
+                    title: "file",
+                    url: `${MODEL}?name=file`,
+                },
+            ],
+        },
     ];
     const result: NavGroup[] = [];
     defaultMainNav.forEach((nav) => {
         const items = nav.items.filter((item) => {
             if (item.roles) {
-                return item.roles.some((role) =>
-                    roles.includes(role),
-                );
+                return item.roles.some((role) => roles.includes(role));
             }
             return true;
         });
@@ -83,7 +91,7 @@ function getMainNav(roles: string[]) {
             result.push(nav);
         }
     });
-    return result
+    return result;
 }
 
 interface User {
@@ -162,9 +170,7 @@ const useUserState = create<UserState>((set) => ({
             token: string;
         }>(USER_LOGIN_TOKEN);
         const msg = `${data.hash}:${sha256(password).toString()}`;
-        const {
-            data: user
-        } = await request.post<UserSession>(
+        const { data: user } = await request.post<UserSession>(
             USER_LOGIN,
             {
                 ts: data.ts,
@@ -205,11 +211,7 @@ const useUserState = create<UserState>((set) => ({
     refresh: async () => {
         await request.patch(USER_REFRESH);
     },
-    list: async (params: {
-        page: number;
-        limit: number;
-        keyword?: string;
-    }) => {
+    list: async (params: { page: number; limit: number; keyword?: string }) => {
         const { data } = await request.get<{
             count: number;
             users: User[];

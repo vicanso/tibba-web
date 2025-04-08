@@ -25,10 +25,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const [apps] = useBasicState(useShallow((state) => [state.apps]));
     const [mainNav] = useUserState(useShallow((state) => [state.mainNav]));
 
-
     const sidebarI18n = useI18n("sidebar");
     const isActive = (url: string) => {
-        return url === location.pathname;
+        const current = url.split("?")[0];
+        return current === location.pathname;
     };
 
     return (
@@ -45,19 +45,18 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                         </SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
-                                {item.items
-                                    .map((item) => (
-                                        <SidebarMenuItem key={item.title}>
-                                            <SidebarMenuButton
-                                                asChild
-                                                isActive={isActive(item.url)}
-                                            >
-                                                <Link to={item.url}>
-                                                    {sidebarI18n(item.title)}
-                                                </Link>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    ))}
+                                {item.items.map((item) => (
+                                    <SidebarMenuItem key={item.title}>
+                                        <SidebarMenuButton
+                                            asChild
+                                            isActive={isActive(item.url)}
+                                        >
+                                            <Link to={item.url}>
+                                                {sidebarI18n(item.title)}
+                                            </Link>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
+                                ))}
                             </SidebarMenu>
                         </SidebarGroupContent>
                     </SidebarGroup>

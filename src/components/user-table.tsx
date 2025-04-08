@@ -112,13 +112,19 @@ export function UserTable({
                     <TableBody>
                         {loading ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">
+                                <TableCell
+                                    colSpan={7}
+                                    className="h-24 text-center"
+                                >
                                     <Loader2Icon className="mx-auto h-6 w-6 animate-spin" />
                                 </TableCell>
                             </TableRow>
                         ) : data.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={7} className="h-24 text-center">
+                                <TableCell
+                                    colSpan={7}
+                                    className="h-24 text-center"
+                                >
                                     No users found.
                                 </TableCell>
                             </TableRow>
@@ -128,19 +134,30 @@ export function UserTable({
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             <Avatar className="h-8 w-8">
-                                                <AvatarImage src={user.avatar || undefined} />
+                                                <AvatarImage
+                                                    src={
+                                                        user.avatar || undefined
+                                                    }
+                                                />
                                                 <AvatarFallback>
-                                                    {user.account.slice(0, 2).toUpperCase()}
+                                                    {user.account
+                                                        .slice(0, 2)
+                                                        .toUpperCase()}
                                                 </AvatarFallback>
                                             </Avatar>
-                                            <div className="font-medium">{user.account}</div>
+                                            <div className="font-medium">
+                                                {user.account}
+                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell>{user.email || "-"}</TableCell>
                                     <TableCell>
                                         <div className="flex flex-wrap gap-1">
                                             {user.roles?.map((role) => (
-                                                <Badge key={role} variant="outline">
+                                                <Badge
+                                                    key={role}
+                                                    variant="outline"
+                                                >
                                                     {role}
                                                 </Badge>
                                             )) || "-"}
@@ -149,13 +166,18 @@ export function UserTable({
                                     <TableCell>
                                         <div className="flex flex-wrap gap-1">
                                             {user.groups?.map((group) => (
-                                                <Badge key={group} variant="secondary">
+                                                <Badge
+                                                    key={group}
+                                                    variant="secondary"
+                                                >
                                                     {group}
                                                 </Badge>
                                             )) || "-"}
                                         </div>
                                     </TableCell>
-                                    <TableCell>{getStatusBadge(user.status)}</TableCell>
+                                    <TableCell>
+                                        {getStatusBadge(user.status)}
+                                    </TableCell>
                                     <TableCell>
                                         {formatDate(user.created)}
                                     </TableCell>
