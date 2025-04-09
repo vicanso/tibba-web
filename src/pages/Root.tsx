@@ -18,7 +18,7 @@ export default function Root() {
             }}
         >
             <AppSidebar />
-            <SidebarInset>
+            <SidebarInset className="w-[var(--sidebar-width)]">
                 <AppHeader />
                 <div className="flex flex-1 flex-col gap-4 p-4">
                     <Outlet />

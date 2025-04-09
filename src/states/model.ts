@@ -13,13 +13,15 @@ interface Condition {
     options: Option[];
 }
 
-enum Category {
-    JSON = "json",
+export enum Category {
+    Json = "json",
     Number = "number",
     String = "string",
+    Date = "date",
+    Bytes = "bytes",
 }
 
-interface Schema {
+export interface Schema {
     name: string;
     category: Category;
     read_only: boolean;
@@ -71,20 +73,28 @@ const useModelState = create<ModelState>((set, get) => ({
         return data;
     },
     list: async (params: { page: number; limit: number; keyword?: string }) => {
-        const { model } = get();
+        const { model, count } = get();
+        const shouldCount = count < 0;
         const { data } = await request.get<{
             count: number;
             items: Record<string, unknown>[];
         }>(MODEL_LIST, {
             params: {
                 model,
+                count: shouldCount,
                 ...params,
             },
         });
-        set({
-            items: data.items,
-            count: data.count,
-        });
+        if (shouldCount) {
+            set({
+                items: data.items,
+                count: data.count,
+            });
+        } else {
+            set({
+                items: data.items,
+            });
+        }
     },
 }));
 

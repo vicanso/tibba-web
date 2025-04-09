@@ -58,6 +58,13 @@ const profile = {
     updateSuccess: "Update profile successfully",
 };
 
+const model = {
+    noRecords: "No records found",
+    rowsPerPage: "Rows per page",
+    selectRowsPerPage: "Select rows",
+    pageContent: "Page {page} of {total}",
+};
+
 export default {
     common,
     sidebar,
@@ -65,4 +72,5 @@ export default {
     signUp,
     appUser,
     profile,
+    model,
 };
