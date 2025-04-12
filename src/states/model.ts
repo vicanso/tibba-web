@@ -7,18 +7,26 @@ interface Option {
     value: string;
 }
 
+export enum ConditionCategory {
+    Input = "input",
+    Select = "select",
+}
+
 interface Condition {
     name: string;
-    category: string;
+    category: ConditionCategory;
     options: Option[];
 }
 
 export enum Category {
-    Json = "json",
-    Number = "number",
     String = "string",
-    Date = "date",
+    Number = "number",
     Bytes = "bytes",
+    Boolean = "boolean",
+    Status = "status",
+    Strings = "strings",
+    Date = "date",
+    Json = "json",
 }
 
 export interface Schema {
@@ -34,6 +42,7 @@ export interface Schema {
 export interface SchemaView {
     schemas: Schema[];
     conditions: Condition[];
+    sort_fields: string[];
 }
 
 interface ModelState {
@@ -47,7 +56,10 @@ interface ModelState {
         page: number;
         limit: number;
         keyword?: string;
+        order_by?: string;
+        filters?: Record<string, string>;
     }) => Promise<void>;
+    reset: () => void;
 }
 
 const useModelState = create<ModelState>((set, get) => ({
@@ -56,6 +68,12 @@ const useModelState = create<ModelState>((set, get) => ({
     items: [],
     count: -1,
     initialized: false,
+    reset() {
+        set({
+            items: [],
+            count: -1,
+        });
+    },
     fetchSchema: async (name: string) => {
         set({
             initialized: false,
@@ -72,9 +90,19 @@ const useModelState = create<ModelState>((set, get) => ({
         });
         return data;
     },
-    list: async (params: { page: number; limit: number; keyword?: string }) => {
+    list: async (params: {
+        page: number;
+        limit: number;
+        keyword?: string;
+        filters?: Record<string, string>;
+        order_by?: string;
+    }) => {
         const { model, count } = get();
         const shouldCount = count < 0;
+        let filters = "";
+        if (Object.keys(params.filters || {}).length > 0) {
+            filters = JSON.stringify(params.filters);
+        }
         const { data } = await request.get<{
             count: number;
             items: Record<string, unknown>[];
@@ -82,7 +110,11 @@ const useModelState = create<ModelState>((set, get) => ({
             params: {
                 model,
                 count: shouldCount,
-                ...params,
+                page: params.page,
+                limit: params.limit,
+                keyword: params.keyword,
+                order_by: params.order_by,
+                filters,
             },
         });
         if (shouldCount) {

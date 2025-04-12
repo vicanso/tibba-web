@@ -75,6 +75,10 @@ function getMainNav(roles: string[]) {
                     title: "file",
                     url: `${MODEL}?name=file`,
                 },
+                {
+                    title: "user",
+                    url: `${MODEL}?name=user`,
+                },
             ],
         },
     ];

@@ -63,6 +63,9 @@ const model = {
     rowsPerPage: "Rows per page",
     selectRowsPerPage: "Select rows",
     pageContent: "Page {page} of {total}",
+    keywordPlaceholder: "Please input keyword",
+    filter: "Filter",
+    select: "Select",
 };
 
 export default {
