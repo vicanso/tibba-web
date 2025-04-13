@@ -1,7 +1,7 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import AppHeader from "@/components/app-header";
-import { Outlet } from "react-router-dom";
+import { Outlet } from "react-router";
 import { useState } from "react";
 
 export default function Root() {

@@ -8,7 +8,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import useBasicState from "@/states/basic";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useShallow } from "zustand/react/shallow";
 
 export default function AppHeader() {

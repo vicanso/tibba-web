@@ -1,5 +1,5 @@
 import { useShallow } from "zustand/react/shallow";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useParams } from "react-router";
 import { useAsync } from "react-async-hook";
 import useModelState, { Category, Schema } from "@/states/model";
 import { toast } from "sonner";
@@ -13,9 +13,19 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Loading } from "@/components/loading";
-import { Loader2Icon, ChevronDownIcon, Columns2Icon, SearchIcon, ArrowDownIcon, ArrowUpIcon, ArrowUpDownIcon } from "lucide-react";
+import {
+    Loader2Icon,
+    ChevronDownIcon,
+    Columns2Icon,
+    SearchIcon,
+    ArrowDownIcon,
+    ArrowUpIcon,
+    ArrowUpDownIcon,
+    ChevronRightIcon,
+    ChevronLeftIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toString, upperFirst } from "lodash-es";
+import { toArray, toString, upperFirst } from "lodash-es";
 import { useI18n } from "@/i18n";
 import bytes from "bytes";
 import {
@@ -24,8 +34,6 @@ import {
     PaginationEllipsis,
     PaginationItem,
     PaginationLink,
-    PaginationNext,
-    PaginationPrevious,
 } from "@/components/ui/pagination";
 import {
     Select,
@@ -46,27 +54,60 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getModelViewOptions, setModelViewOptions } from "@/storage";
+import { Badge } from "@/components/ui/badge";
 
-
-function formatTableCell(schema: Schema, data: unknown) {
+function formatTableCell(
+    i18nModel: (value: string) => string,
+    schema: Schema,
+    data: unknown,
+) {
     let value = toString(data);
     let className = "";
     if (schema.fixed) {
         className = "sticky left-0 bg-background z-10";
     }
+    let element = <span>{value}</span>;
     switch (schema.category) {
         case Category.Date:
             value = formatDate(value);
             className += " w-[180px]";
+            element = <span>{value}</span>;
             break;
         case Category.Bytes:
             value = bytes(Number(value)) || "";
             className += " w-[100px]";
+            element = <span>{value}</span>;
+            break;
+        case Category.Status:
+            if (value === "1") {
+                element = (
+                    <Badge variant="default" className="bg-blue-500 text-white">
+                        {i18nModel("active")}
+                    </Badge>
+                );
+            } else {
+                element = (
+                    <Badge variant="destructive">{i18nModel("inactive")}</Badge>
+                );
+            }
+            className += " w-[100px]";
+            break;
+        case Category.Strings:
+            {
+                const arr = toArray(data).map((item) => {
+                    return (
+                        <Badge key={item} variant="outline">
+                            {item}
+                        </Badge>
+                    );
+                });
+                element = <div className="flex flex-wrap gap-2">{arr}</div>;
+            }
             break;
         default:
             break;
     }
-    return { value, className };
+    return { element, className };
 }
 
 function formatFieldName(name: string) {
@@ -76,8 +117,11 @@ function formatFieldName(name: string) {
 export default function Model() {
     const i18nModel = useI18n("model");
     const [searchParams, setSearchParams] = useSearchParams();
-    let modelViewOptions = getModelViewOptions(searchParams.get("name") || "");
-    const [hiddenColumns, setHiddenColumns] = useState<string[]>(modelViewOptions.hiddenColumns);
+    const modelName = useParams().name || "";
+    let modelViewOptions = getModelViewOptions(modelName);
+    const [hiddenColumns, setHiddenColumns] = useState<string[]>(
+        modelViewOptions.hiddenColumns,
+    );
     const [keyword, setKeyword] = useState("");
     const [
         initialized,
@@ -101,17 +145,14 @@ export default function Model() {
         ]),
     );
 
-
     const [filters, setFilters] = useState<Record<string, string>>({});
     const getQueryOptions = (params: URLSearchParams) => {
         const page = params.get("page");
         const limit = params.get("limit");
-        const name = params.get("name") || "";
         const sort = params.get("sort") || "-modified";
         return {
             page: page ? parseInt(page) : 1,
             limit: limit ? parseInt(limit) : modelViewOptions.limit,
-            name,
             sort,
         };
     };
@@ -122,9 +163,9 @@ export default function Model() {
         setSearchParams(params);
     };
     const updateLimit = (limit: number) => {
-        const name = getQueryOptions(searchParams).name;
+        // const name = getQueryOptions(searchParams).name;
         modelViewOptions.limit = limit;
-        setModelViewOptions(name, modelViewOptions);
+        setModelViewOptions(modelName, modelViewOptions);
 
         const params = new URLSearchParams(searchParams);
         params.delete("page");
@@ -132,7 +173,6 @@ export default function Model() {
         setSearchParams(params);
     };
     const updateHiddenColumns = (column: string, checked: boolean) => {
-        const name = getQueryOptions(searchParams).name;
         const hiddenColumns = modelViewOptions.hiddenColumns;
         const index = hiddenColumns.indexOf(column);
         if (!checked) {
@@ -143,9 +183,9 @@ export default function Model() {
             hiddenColumns.splice(index, 1);
         }
         modelViewOptions.hiddenColumns = hiddenColumns;
-        setModelViewOptions(name, modelViewOptions);
+        setModelViewOptions(modelName, modelViewOptions);
         setHiddenColumns(hiddenColumns);
-    }
+    };
     const updateSort = (sortField: string) => {
         const { sort } = getQueryOptions(searchParams);
         const params = new URLSearchParams(searchParams);
@@ -157,7 +197,7 @@ export default function Model() {
             params.set("sort", `-${sortField}`);
         }
         setSearchParams(params);
-    }
+    };
     const triggerSearch = () => {
         const params = new URLSearchParams(searchParams);
         // trigger search params update
@@ -173,43 +213,53 @@ export default function Model() {
         triggerSearch();
     };
 
+    const resetFilterConditions = () => {
+        setKeyword("");
+        setFilters({});
+    };
+
     useAsync(async () => {
         try {
-            const {
-                page,
-                limit,
-                name,
-                sort,
-            } = getQueryOptions(searchParams);
-            if (name && name !== model) {
-                await fetchSchema(name);
-                modelViewOptions = getModelViewOptions(name);
-            }
-            await list({
+            const { page, limit, sort } = getQueryOptions(searchParams);
+            const listParams = {
                 page,
                 limit,
                 keyword,
                 filters,
                 order_by: sort,
-            });
+            };
+            if (modelName && modelName !== model) {
+                resetFilterConditions();
+                listParams.keyword = "";
+                listParams.filters = {};
+                reset();
+                await fetchSchema(modelName);
+                modelViewOptions = getModelViewOptions(modelName);
+                setHiddenColumns(modelViewOptions.hiddenColumns);
+            }
+            await list(listParams);
         } catch (error) {
             toast(formatError(error));
         }
-    }, [searchParams]);
+    }, [searchParams, modelName]);
     if (!initialized) {
         return <Loading />;
     }
 
-    const schemas = schemaView.schemas.filter((schema) => !schema.hidden && !hiddenColumns.includes(schema.name));
+    const schemas = schemaView.schemas.filter(
+        (schema) => !schema.hidden && !hiddenColumns.includes(schema.name),
+    );
     const headers = schemas.map((schema) => {
         let className = "";
         if (schema.fixed) {
             className = "sticky left-0 bg-background z-10";
         }
         const supportSort = schemaView.sort_fields.includes(schema.name);
-        let text = <span className="text-muted-foreground">
-            {formatFieldName(schema.name)}
-        </span>;
+        let text = (
+            <span className="text-muted-foreground">
+                {formatFieldName(schema.name)}
+            </span>
+        );
         if (supportSort) {
             let icon = <ArrowUpDownIcon />;
             const { sort } = getQueryOptions(searchParams);
@@ -218,16 +268,22 @@ export default function Model() {
             } else if (sort === schema.name) {
                 icon = <ArrowUpIcon />;
             }
-            text = <Button variant="ghost" className="flex items-center gap-1 cursor-pointer text-muted-foreground" onClick={() => {
-                updateSort(schema.name);
-            }}>
-                {formatFieldName(schema.name)}
-                {icon}
-            </Button>
+            text = (
+                <Button
+                    variant="ghost"
+                    className="flex items-center gap-1 cursor-pointer text-muted-foreground"
+                    onClick={() => {
+                        updateSort(schema.name);
+                    }}
+                >
+                    {formatFieldName(schema.name)}
+                    {icon}
+                </Button>
+            );
         }
 
         return (
-            <TableHead className={cn("h-14", className)} key={schema.name}>
+            <TableHead className={cn("h-12", className)} key={schema.name}>
                 {text}
             </TableHead>
         );
@@ -261,16 +317,17 @@ export default function Model() {
         rows = items.map((item) => {
             const key = `${item.id}`;
             const fields = schemas.map((schema) => {
-                const { value, className } = formatTableCell(
+                const { element, className } = formatTableCell(
+                    i18nModel,
                     schema,
                     item[schema.name],
                 );
                 return (
                     <TableCell
-                        className={cn("h-16", className)}
+                        className={cn("h-14", className)}
                         key={`${key}-${schema.name} `}
                     >
-                        {value}
+                        {element}
                     </TableCell>
                 );
             });
@@ -291,13 +348,21 @@ export default function Model() {
         if (startPage > 1) {
             arr.push(
                 <PaginationItem key="previous">
-                    <PaginationPrevious
-                        href="#"
+                    <PaginationLink
+                        aria-label="Go to previous page"
+                        size="default"
+                        className="gap-1 px-2.5 sm:pl-2.5"
                         onClick={(e) => {
                             e.preventDefault();
                             updatePage(page - 1);
                         }}
-                    />
+                        href="#"
+                    >
+                        <ChevronLeftIcon />
+                        <span className="hidden sm:block">
+                            {i18nModel("previousPage")}
+                        </span>
+                    </PaginationLink>
                 </PaginationItem>,
                 <PaginationItem key="ellipsis-start">
                     <PaginationEllipsis />
@@ -322,19 +387,27 @@ export default function Model() {
                 </PaginationItem>,
             );
         }
-        if (endPage !== pageCount) {
+        if (page < pageCount) {
             arr.push(
                 <PaginationItem key="ellipsis-end">
                     <PaginationEllipsis />
                 </PaginationItem>,
                 <PaginationItem key="next">
-                    <PaginationNext
+                    <PaginationLink
+                        aria-label="Go to next page"
+                        size="default"
+                        className="gap-1 px-2.5 sm:pr-2.5"
                         href="#"
                         onClick={(e) => {
                             e.preventDefault();
                             updatePage(page + 1);
                         }}
-                    />
+                    >
+                        <span className="hidden sm:block">
+                            {i18nModel("nextPage")}
+                        </span>
+                        <ChevronRightIcon />
+                    </PaginationLink>
                 </PaginationItem>,
             );
         }
@@ -389,7 +462,9 @@ export default function Model() {
                 }}
             >
                 <SelectTrigger className="w-[150px]">
-                    <SelectValue placeholder={`${i18nModel("select")} ${name}`} />
+                    <SelectValue
+                        placeholder={`${i18nModel("select")} ${name}`}
+                    />
                 </SelectTrigger>
                 <SelectContent>
                     <SelectGroup>
@@ -456,7 +531,9 @@ export default function Model() {
             <div className="flex items-center justify-end mt-4">
                 <div className="flex items-center space-x-6 lg:space-x-8">
                     <Select
-                        defaultValue={getQueryOptions(searchParams).limit.toString()}
+                        defaultValue={getQueryOptions(
+                            searchParams,
+                        ).limit.toString()}
                         onValueChange={(value) => {
                             updateLimit(parseInt(value));
                         }}
@@ -480,7 +557,10 @@ export default function Model() {
                     </Select>
                     <div className="flex w-[120px] items-center justify-center text-sm font-medium">
                         {i18nModel("pageContent")
-                            .replace("{page}", getQueryOptions(searchParams).page.toString())
+                            .replace(
+                                "{page}",
+                                getQueryOptions(searchParams).page.toString(),
+                            )
                             .replace("{total}", pageCount.toString())}
                     </div>
                     {renderPagination()}

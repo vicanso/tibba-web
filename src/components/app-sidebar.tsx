@@ -17,8 +17,8 @@ import { AppUser } from "@/components/app-user";
 import useBasicState from "@/states/basic";
 import { useShallow } from "zustand/react/shallow";
 import { useI18n } from "@/i18n";
-import { Link } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import { Link } from "react-router";
+import { useLocation } from "react-router";
 import useUserState from "@/states/user";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const location = useLocation();

@@ -6,7 +6,9 @@ export interface ModelViewOptions {
 
 export function getModelViewOptions(name: string): ModelViewOptions {
     const options = localStorage.getItem(`${name}-view-options`);
-    return options ? JSON.parse(options) : { limit: 10, hiddenColumns: [], order_by: "" };
+    return options
+        ? JSON.parse(options)
+        : { limit: 10, hiddenColumns: [], order_by: "" };
 }
 
 export function setModelViewOptions(name: string, options: ModelViewOptions) {

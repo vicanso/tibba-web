@@ -37,7 +37,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import { formatError } from "@/helpers/util";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { LOGIN, PROFILE } from "@/constants/route";
 import { useState } from "react";
 import { useTheme } from "@/components/theme-provider";

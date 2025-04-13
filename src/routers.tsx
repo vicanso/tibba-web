@@ -1,7 +1,6 @@
-import { createHashRouter } from "react-router-dom";
+import { createHashRouter } from "react-router";
 import Root from "@/pages/Root";
 import Home from "@/pages/Home";
-import User from "@/pages/User";
 import LoginHistory from "@/pages/LoginHistory";
 import Login from "@/pages/Login";
 import SignUp from "@/pages/SignUp";
@@ -9,7 +8,6 @@ import Profile from "@/pages/Profile";
 import Model from "@/pages/Model";
 
 import {
-    USER,
     LOGIN_HISTORY,
     HOME,
     LOGIN,
@@ -28,10 +26,6 @@ const router = createHashRouter([
                 element: <Home />,
             },
             {
-                path: USER,
-                element: <User />,
-            },
-            {
                 path: LOGIN_HISTORY,
                 element: <LoginHistory />,
             },
@@ -48,7 +42,7 @@ const router = createHashRouter([
                 element: <Profile />,
             },
             {
-                path: MODEL,
+                path: `${MODEL}/:name`,
                 element: <Model />,
             },
         ],

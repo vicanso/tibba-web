@@ -37,6 +37,8 @@ export interface Schema {
     fixed: boolean;
     options: Option[] | null;
     hidden: boolean;
+    sortable: boolean;
+    filterable: boolean;
 }
 
 export interface SchemaView {
@@ -83,6 +85,19 @@ const useModelState = create<ModelState>((set, get) => ({
                 name,
             },
         });
+        data.sort_fields = data.schemas
+            .filter((schema) => schema.sortable)
+            .map((schema) => schema.name);
+        data.conditions = data.schemas
+            .filter((schema) => schema.filterable)
+            .map((schema) => {
+                // TODO: 根据schema.category 确定filter options
+                return {
+                    name: schema.name,
+                    category: ConditionCategory.Select,
+                    options: schema.options || [],
+                };
+            });
         set({
             model: name,
             schemaView: data,

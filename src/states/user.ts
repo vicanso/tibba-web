@@ -2,7 +2,7 @@ import { create } from "zustand";
 import request from "@/helpers/request";
 import sha256 from "crypto-js/sha256";
 import { Users, LucideIcon, ComponentIcon } from "lucide-react";
-import { HOME, USER, LOGIN_HISTORY, MODEL } from "@/constants/route";
+import { HOME, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
 import {
     USER_LOGIN,
@@ -55,11 +55,6 @@ function getMainNav(roles: string[]) {
                     url: HOME,
                 },
                 {
-                    title: "user",
-                    url: USER,
-                    roles: ["su", "admin"],
-                },
-                {
                     title: "loginHistory",
                     url: LOGIN_HISTORY,
                     roles: ["su", "admin"],
@@ -73,11 +68,12 @@ function getMainNav(roles: string[]) {
             items: [
                 {
                     title: "file",
-                    url: `${MODEL}?name=file`,
+                    url: `${MODEL}/file`,
                 },
                 {
                     title: "user",
-                    url: `${MODEL}?name=user`,
+                    url: `${MODEL}/user`,
+                    roles: ["su", "admin"],
                 },
             ],
         },

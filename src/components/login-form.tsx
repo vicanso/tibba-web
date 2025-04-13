@@ -10,7 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useI18n } from "@/i18n";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation } from "react-router";
 import { HOME, SIGN_UP } from "@/constants/route";
 import { Captcha } from "@/components/captcha";
 import { useState } from "react";

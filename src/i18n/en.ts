@@ -65,7 +65,11 @@ const model = {
     pageContent: "Page {page} of {total}",
     keywordPlaceholder: "Please input keyword",
     filter: "Filter",
+    active: "Active",
+    inactive: "Inactive",
     select: "Select",
+    nextPage: "Next",
+    previousPage: "Previous",
 };
 
 export default {
