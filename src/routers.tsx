@@ -6,6 +6,7 @@ import Login from "@/pages/Login";
 import SignUp from "@/pages/SignUp";
 import Profile from "@/pages/Profile";
 import Model from "@/pages/Model";
+import ModelEditor from "@/pages/ModelEditor";
 
 import {
     LOGIN_HISTORY,
@@ -14,6 +15,7 @@ import {
     SIGN_UP,
     PROFILE,
     MODEL,
+    MODEL_EDITOR,
 } from "@/constants/route";
 
 const router = createHashRouter([
@@ -45,8 +47,16 @@ const router = createHashRouter([
                 path: `${MODEL}/:name`,
                 element: <Model />,
             },
+            {
+                path: `${MODEL_EDITOR}/:name/:id`,
+                element: <ModelEditor />,
+            },
         ],
     },
 ]);
+
+export function goTo(path: string) {
+    router.navigate(path);
+}
 
 export default router;

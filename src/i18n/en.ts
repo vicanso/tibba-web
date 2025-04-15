@@ -68,8 +68,16 @@ const model = {
     active: "Active",
     inactive: "Inactive",
     select: "Select",
+    input: "Input",
     nextPage: "Next",
     previousPage: "Previous",
+    columns: "Columns",
+    view: "View",
+    edit: "Edit",
+    delete: "Delete",
+    deleteTitle: "Are you absolutely sure?",
+    deleteDescription:
+        "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
 };
 
 export default {

@@ -1,7 +1,13 @@
 import { create } from "zustand";
 import request from "@/helpers/request";
 import sha256 from "crypto-js/sha256";
-import { Users, LucideIcon, ComponentIcon } from "lucide-react";
+import {
+    UsersIcon,
+    LucideIcon,
+    LogInIcon,
+    FileIcon,
+    HomeIcon,
+} from "lucide-react";
 import { HOME, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
 import {
@@ -32,13 +38,13 @@ interface NavItem {
     title: string;
     url: string;
     disabled?: boolean;
+    icon: LucideIcon; // 使用 LucideIcon 类型
     roles?: string[];
 }
 
 // 导航组接口
 interface NavGroup {
     title: string;
-    icon: LucideIcon; // 使用 LucideIcon 类型
     url: string;
     items: NavItem[];
 }
@@ -47,33 +53,35 @@ function getMainNav(roles: string[]) {
     const defaultMainNav: NavGroup[] = [
         {
             title: "userFeature",
-            icon: Users,
             url: "#",
             items: [
                 {
-                    title: "HOME",
+                    title: "home",
                     url: HOME,
+                    icon: HomeIcon,
                 },
                 {
                     title: "loginHistory",
                     url: LOGIN_HISTORY,
                     roles: ["su", "admin"],
+                    icon: LogInIcon,
                 },
             ],
         },
         {
             title: "modelFeature",
-            icon: ComponentIcon,
             url: "#",
             items: [
                 {
                     title: "file",
                     url: `${MODEL}/file`,
+                    icon: FileIcon,
                 },
                 {
                     title: "user",
                     url: `${MODEL}/user`,
                     roles: ["su", "admin"],
+                    icon: UsersIcon,
                 },
             ],
         },

@@ -34,6 +34,7 @@ export interface Schema {
     category: Category;
     read_only: boolean;
     required: boolean;
+    identity: boolean;
     fixed: boolean;
     options: Option[] | null;
     hidden: boolean;
@@ -91,10 +92,14 @@ const useModelState = create<ModelState>((set, get) => ({
         data.conditions = data.schemas
             .filter((schema) => schema.filterable)
             .map((schema) => {
+                let category = ConditionCategory.Input;
+                if (schema.options) {
+                    category = ConditionCategory.Select;
+                }
                 // TODO: 根据schema.category 确定filter options
                 return {
                     name: schema.name,
-                    category: ConditionCategory.Select,
+                    category,
                     options: schema.options || [],
                 };
             });

@@ -30,9 +30,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         const current = url.split("?")[0];
         return current === location.pathname;
     };
-
     return (
-        <Sidebar {...props}>
+        <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
                 <AppSwitcher apps={apps} defaultApp={apps[0]} />
             </SidebarHeader>
@@ -40,18 +39,22 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 {mainNav.map((item) => (
                     <SidebarGroup key={item.title}>
                         <SidebarGroupLabel>
-                            {<item.icon className="mr-1" />}
                             {sidebarI18n(item.title)}
                         </SidebarGroupLabel>
                         <SidebarGroupContent>
                             <SidebarMenu>
                                 {item.items.map((item) => (
-                                    <SidebarMenuItem key={item.title}>
+                                    <SidebarMenuItem
+                                        key={item.title}
+                                        className="text-nowrap"
+                                        title={sidebarI18n(item.title)}
+                                    >
                                         <SidebarMenuButton
                                             asChild
                                             isActive={isActive(item.url)}
                                         >
                                             <Link to={item.url}>
+                                                {<item.icon className="mr-1" />}
                                                 {sidebarI18n(item.title)}
                                             </Link>
                                         </SidebarMenuButton>

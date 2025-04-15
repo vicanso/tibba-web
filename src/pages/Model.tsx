@@ -1,7 +1,11 @@
 import { useShallow } from "zustand/react/shallow";
 import { useSearchParams, useParams } from "react-router";
 import { useAsync } from "react-async-hook";
-import useModelState, { Category, Schema } from "@/states/model";
+import useModelState, {
+    Category,
+    ConditionCategory,
+    Schema,
+} from "@/states/model";
 import { toast } from "sonner";
 import { formatDate, formatError } from "@/helpers/util";
 import {
@@ -15,7 +19,6 @@ import {
 import { Loading } from "@/components/loading";
 import {
     Loader2Icon,
-    ChevronDownIcon,
     Columns2Icon,
     SearchIcon,
     ArrowDownIcon,
@@ -23,6 +26,10 @@ import {
     ArrowUpDownIcon,
     ChevronRightIcon,
     ChevronLeftIcon,
+    EllipsisIcon,
+    EyeIcon,
+    FilePenLineIcon,
+    TrashIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toArray, toString, upperFirst } from "lodash-es";
@@ -50,11 +57,26 @@ import {
     DropdownMenuCheckboxItem,
     DropdownMenuContent,
     DropdownMenuTrigger,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getModelViewOptions, setModelViewOptions } from "@/storage";
 import { Badge } from "@/components/ui/badge";
+import { MODEL_EDITOR } from "@/constants/route";
+import { goTo } from "@/routers";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 function formatTableCell(
     i18nModel: (value: string) => string,
@@ -117,6 +139,8 @@ function formatFieldName(name: string) {
 export default function Model() {
     const i18nModel = useI18n("model");
     const [searchParams, setSearchParams] = useSearchParams();
+    const [targetId, setTargetId] = useState<number | null>(null);
+    const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
     const modelName = useParams().name || "";
     let modelViewOptions = getModelViewOptions(modelName);
     const [hiddenColumns, setHiddenColumns] = useState<string[]>(
@@ -156,6 +180,19 @@ export default function Model() {
             sort,
         };
     };
+    const getIdentity = (id: number | null) => {
+        if (!id) {
+            return "";
+        }
+        const item = items.find((item) => item.id === id);
+        const identity = schemaView.schemas.find(
+            (schema) => schema.identity,
+        )?.name;
+        if (item && identity) {
+            return `${item[identity]}`;
+        }
+        return "";
+    };
 
     const updatePage = (page: number) => {
         const params = new URLSearchParams(searchParams);
@@ -163,7 +200,6 @@ export default function Model() {
         setSearchParams(params);
     };
     const updateLimit = (limit: number) => {
-        // const name = getQueryOptions(searchParams).name;
         modelViewOptions.limit = limit;
         setModelViewOptions(modelName, modelViewOptions);
 
@@ -197,6 +233,12 @@ export default function Model() {
             params.set("sort", `-${sortField}`);
         }
         setSearchParams(params);
+    };
+    const goToView = (id: number) => {
+        goTo(`${MODEL_EDITOR}/${modelName}/${id}`);
+    };
+    const goToEdit = (id: number) => {
+        goTo(`${MODEL_EDITOR}/${modelName}/${id}?type=edit`);
     };
     const triggerSearch = () => {
         const params = new URLSearchParams(searchParams);
@@ -288,6 +330,9 @@ export default function Model() {
             </TableHead>
         );
     });
+    headers.push(
+        <TableHead className="h-12 w-18" key="actions-header"></TableHead>,
+    );
 
     let loadingTips = <></>;
     let rows: React.ReactNode[] = [];
@@ -315,7 +360,8 @@ export default function Model() {
         );
     } else {
         rows = items.map((item) => {
-            const key = `${item.id}`;
+            const id = item.id as number;
+            const key = `${id}`;
             const fields = schemas.map((schema) => {
                 const { element, className } = formatTableCell(
                     i18nModel,
@@ -331,6 +377,58 @@ export default function Model() {
                     </TableCell>
                 );
             });
+            fields.push(
+                <TableCell key="actions-cell" className="h-14 w-18">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="cursor-pointer"
+                            >
+                                <EllipsisIcon />
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent
+                            className="w-48"
+                            align="start"
+                            side="left"
+                        >
+                            <DropdownMenuGroup>
+                                <DropdownMenuItem
+                                    className="flex justify-between gap-2 cursor-pointer"
+                                    onClick={() => {
+                                        goToView(id);
+                                    }}
+                                >
+                                    {i18nModel("view")}
+                                    <EyeIcon />
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                    className="flex justify-between gap-2 cursor-pointer"
+                                    onClick={() => {
+                                        goToEdit(id);
+                                    }}
+                                >
+                                    {i18nModel("edit")}
+                                    <FilePenLineIcon />
+                                </DropdownMenuItem>
+                            </DropdownMenuGroup>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                className="flex justify-between gap-2 cursor-pointer"
+                                onClick={() => {
+                                    setTargetId(id);
+                                    setOpenDeleteDialog(true);
+                                }}
+                            >
+                                {i18nModel("delete")}
+                                <TrashIcon />
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </TableCell>,
+            );
 
             return <TableRow key={`${item.id} `}>{fields}</TableRow>;
         });
@@ -435,8 +533,19 @@ export default function Model() {
         });
     const conditions = schemaView.conditions.map((condition) => {
         const { category, options, name } = condition;
-        // condition category: input select
-        console.dir(category);
+        if (category === ConditionCategory.Input) {
+            return (
+                <Input
+                    className="w-[200px]"
+                    key={name}
+                    placeholder={`${i18nModel("input")} ${name}`}
+                    onChange={(e) => {
+                        filters[name] = e.target.value.trim();
+                        setFilters(filters);
+                    }}
+                />
+            );
+        }
         const items = options.map((option) => {
             return (
                 <SelectItem
@@ -457,11 +566,9 @@ export default function Model() {
                         filters[name] = value;
                     }
                     setFilters(filters);
-                    // setLimitToStorage(queryOptions.name, parseInt(value));
-                    // updateLimit(parseInt(value));
                 }}
             >
-                <SelectTrigger className="w-[150px]">
+                <SelectTrigger className="w-[200px]">
                     <SelectValue
                         placeholder={`${i18nModel("select")} ${name}`}
                     />
@@ -479,8 +586,41 @@ export default function Model() {
     });
     return (
         <div>
-            <div className="flex justify-between gap-2 mb-4">
+            <AlertDialog
+                open={openDeleteDialog}
+                onOpenChange={(open) => {
+                    if (!open) {
+                        setOpenDeleteDialog(false);
+                    }
+                }}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>
+                            {i18nModel("deleteTitle")}
+                        </AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {i18nModel("deleteDescription")}
+                        </AlertDialogDescription>
+                        <AlertDialogDescription>
+                            Schema:{" "}
+                            <span className="font-bold">{modelName}</span>{" "}
+                            <br />
+                            Id:{" "}
+                            <span className="font-bold">
+                                {getIdentity(targetId)}
+                            </span>
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction>Continue</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <div className="flex gap-2 mb-4">
                 <Input
+                    className="w-[200px]"
                     placeholder={i18nModel("keywordPlaceholder")}
                     onKeyDownCapture={(e) => {
                         if (e.key === "Enter") {
@@ -502,15 +642,12 @@ export default function Model() {
                     <SearchIcon />
                     {i18nModel("filter")}
                 </Button>
+                <div className="flex-grow"></div>
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline">
                             <Columns2Icon />
-                            <span className="hidden lg:inline">
-                                Customize Columns
-                            </span>
-                            <span className="lg:hidden">Columns</span>
-                            <ChevronDownIcon />
+                            <span>{i18nModel("columns")}</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-56">

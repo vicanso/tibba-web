@@ -5,3 +5,4 @@ export const PROFILE = "/profile";
 export const LOGIN_HISTORY = "/login-history";
 
 export const MODEL = "/model";
+export const MODEL_EDITOR = "/model-editor";
