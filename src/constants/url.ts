@@ -11,3 +11,4 @@ export const COMMON_CAPTCHA = "/commons/captcha";
 
 export const MODEL_SCHEMA = "/models/schema";
 export const MODEL_LIST = "/models/list";
+export const MODEL_DELETE = "/models/delete";

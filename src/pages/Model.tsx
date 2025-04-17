@@ -152,10 +152,11 @@ export default function Model() {
         model,
         schemaView,
         fetchSchema,
-        list,
-        items,
-        count,
-        reset,
+        listModel,
+        modelItems,
+        modelCount,
+        modelReset,
+        removeModel,
     ] = useModelState(
         useShallow((state) => [
             state.initialized,
@@ -166,6 +167,7 @@ export default function Model() {
             state.items,
             state.count,
             state.reset,
+            state.remove,
         ]),
     );
 
@@ -184,7 +186,7 @@ export default function Model() {
         if (!id) {
             return "";
         }
-        const item = items.find((item) => item.id === id);
+        const item = modelItems.find((item) => item.id === id);
         const identity = schemaView.schemas.find(
             (schema) => schema.identity,
         )?.name;
@@ -251,13 +253,21 @@ export default function Model() {
         setSearchParams(params);
     };
     const handleFilter = () => {
-        reset();
+        modelReset();
         triggerSearch();
     };
 
     const resetFilterConditions = () => {
         setKeyword("");
         setFilters({});
+    };
+    const handleDelete = () => {
+        if (targetId) {
+            removeModel({
+                id: targetId,
+                model: modelName,
+            });
+        }
     };
 
     useAsync(async () => {
@@ -274,12 +284,12 @@ export default function Model() {
                 resetFilterConditions();
                 listParams.keyword = "";
                 listParams.filters = {};
-                reset();
+                modelReset();
                 await fetchSchema(modelName);
                 modelViewOptions = getModelViewOptions(modelName);
                 setHiddenColumns(modelViewOptions.hiddenColumns);
             }
-            await list(listParams);
+            await listModel(listParams);
         } catch (error) {
             toast(formatError(error));
         }
@@ -336,7 +346,7 @@ export default function Model() {
 
     let loadingTips = <></>;
     let rows: React.ReactNode[] = [];
-    if (count === -1) {
+    if (modelCount === -1) {
         loadingTips = (
             <TableRow>
                 <TableCell
@@ -347,7 +357,7 @@ export default function Model() {
                 </TableCell>
             </TableRow>
         );
-    } else if (count === 0) {
+    } else if (modelCount === 0) {
         loadingTips = (
             <TableRow>
                 <TableCell
@@ -359,7 +369,7 @@ export default function Model() {
             </TableRow>
         );
     } else {
-        rows = items.map((item) => {
+        rows = modelItems.map((item) => {
             const id = item.id as number;
             const key = `${id}`;
             const fields = schemas.map((schema) => {
@@ -433,10 +443,10 @@ export default function Model() {
             return <TableRow key={`${item.id} `}>{fields}</TableRow>;
         });
     }
-    const pageCount = Math.ceil(count / getQueryOptions(searchParams).limit);
+    const pageCount = Math.ceil(modelCount / getQueryOptions(searchParams).limit);
 
     const renderPagination = () => {
-        if (count < 0) {
+        if (modelCount < 0) {
             return <></>;
         }
         const arr = [];
@@ -613,8 +623,8 @@ export default function Model() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
-                        <AlertDialogAction>Continue</AlertDialogAction>
+                        <AlertDialogCancel className="cursor-pointer">{i18nModel("cancel")}</AlertDialogCancel>
+                        <AlertDialogAction className="cursor-pointer" onClick={handleDelete}>{i18nModel("continue")}</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>

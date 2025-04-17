@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { MODEL_SCHEMA, MODEL_LIST } from "@/constants/url";
+import { MODEL_SCHEMA, MODEL_LIST, MODEL_DELETE } from "@/constants/url";
 import request from "@/helpers/request";
 
 interface Option {
@@ -63,6 +63,10 @@ interface ModelState {
         filters?: Record<string, string>;
     }) => Promise<void>;
     reset: () => void;
+    remove: (params: {
+        id: number,
+        model: string,
+    }) => Promise<void>;
 }
 
 const useModelState = create<ModelState>((set, get) => ({
@@ -147,6 +151,21 @@ const useModelState = create<ModelState>((set, get) => ({
                 items: data.items,
             });
         }
+    },
+    remove: async (params: {
+        id: number,
+        model: string,
+    }) => {
+        await request.delete(MODEL_DELETE, {
+            params: {
+                id: params.id,
+                model: params.model,
+            },
+        });
+        const { items } = get();
+        set({
+            items: items.filter((item) => item.id !== params.id),
+        });
     },
 }));
 

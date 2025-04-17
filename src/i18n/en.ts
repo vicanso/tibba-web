@@ -78,6 +78,8 @@ const model = {
     deleteTitle: "Are you absolutely sure?",
     deleteDescription:
         "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
+    cancel: "Cancel",
+    continue: "Continue",
 };
 
 export default {
