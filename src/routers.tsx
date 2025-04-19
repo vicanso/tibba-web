@@ -59,4 +59,8 @@ export function goTo(path: string) {
     router.navigate(path);
 }
 
+export function goBack() {
+    window.history.back();
+}
+
 export default router;

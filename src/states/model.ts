@@ -1,6 +1,13 @@
 import { create } from "zustand";
-import { MODEL_SCHEMA, MODEL_LIST, MODEL_DELETE } from "@/constants/url";
+import {
+    MODEL_SCHEMA,
+    MODEL_LIST,
+    MODEL_DELETE,
+    MODEL_DETAIL,
+    MODEL_UPDATE,
+} from "@/constants/url";
 import request from "@/helpers/request";
+import { isNil } from "lodash-es";
 
 interface Option {
     label: string;
@@ -63,9 +70,15 @@ interface ModelState {
         filters?: Record<string, string>;
     }) => Promise<void>;
     reset: () => void;
-    remove: (params: {
-        id: number,
-        model: string,
+    remove: (params: { id: number; model: string }) => Promise<void>;
+    detail: (params: {
+        id: number;
+        model: string;
+    }) => Promise<Record<string, unknown>>;
+    update: (params: {
+        id: number;
+        model: string;
+        data: Record<string, unknown>;
     }) => Promise<void>;
 }
 
@@ -152,10 +165,7 @@ const useModelState = create<ModelState>((set, get) => ({
             });
         }
     },
-    remove: async (params: {
-        id: number,
-        model: string,
-    }) => {
+    remove: async (params: { id: number; model: string }) => {
         await request.delete(MODEL_DELETE, {
             params: {
                 id: params.id,
@@ -166,6 +176,45 @@ const useModelState = create<ModelState>((set, get) => ({
         set({
             items: items.filter((item) => item.id !== params.id),
         });
+    },
+    detail: async (params: { id: number; model: string }) => {
+        const { data } = await request.get<Record<string, unknown>>(
+            MODEL_DETAIL,
+            {
+                params: {
+                    id: params.id,
+                    model: params.model,
+                },
+            },
+        );
+        const { schemaView } = get();
+        Object.keys(data).forEach((key) => {
+            if (!isNil(data[key])) {
+                return;
+            }
+            const schema = schemaView.schemas.find(
+                (schema) => schema.name === key,
+            );
+            if (!schema) {
+                return;
+            }
+            switch (schema.category) {
+                case Category.Strings:
+                    data[key] = [];
+                    break;
+                default:
+                    data[key] = "";
+                    break;
+            }
+        });
+        return data;
+    },
+    update: async (params: {
+        id: number;
+        model: string;
+        data: Record<string, unknown>;
+    }) => {
+        await request.patch(MODEL_UPDATE, params);
     },
 }));
 

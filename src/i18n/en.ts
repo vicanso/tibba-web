@@ -82,6 +82,13 @@ const model = {
     continue: "Continue",
 };
 
+const modelEditor = {
+    update: "Update",
+    back: "Back",
+    noChange: "No changes to update",
+    updateSuccess: "Update successfully",
+};
+
 export default {
     common,
     sidebar,
@@ -90,4 +97,5 @@ export default {
     appUser,
     profile,
     model,
+    modelEditor,
 };

@@ -58,8 +58,6 @@ import {
     DropdownMenuContent,
     DropdownMenuTrigger,
     DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,6 +75,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { StatusBadge } from "@/components/model-components";
 
 function formatTableCell(
     i18nModel: (value: string) => string,
@@ -101,17 +100,9 @@ function formatTableCell(
             element = <span>{value}</span>;
             break;
         case Category.Status:
-            if (value === "1") {
-                element = (
-                    <Badge variant="default" className="bg-blue-500 text-white">
-                        {i18nModel("active")}
-                    </Badge>
-                );
-            } else {
-                element = (
-                    <Badge variant="destructive">{i18nModel("inactive")}</Badge>
-                );
-            }
+            element = (
+                <StatusBadge status={value as string} i18nModel={i18nModel} />
+            );
             className += " w-[100px]";
             break;
         case Category.Strings:
@@ -152,7 +143,7 @@ export default function Model() {
         model,
         schemaView,
         fetchSchema,
-        listModel,
+        modelList,
         modelItems,
         modelCount,
         modelReset,
@@ -289,7 +280,7 @@ export default function Model() {
                 modelViewOptions = getModelViewOptions(modelName);
                 setHiddenColumns(modelViewOptions.hiddenColumns);
             }
-            await listModel(listParams);
+            await modelList(listParams);
         } catch (error) {
             toast(formatError(error));
         }
@@ -340,8 +331,14 @@ export default function Model() {
             </TableHead>
         );
     });
+
+    const actionClass = "w-24";
+
     headers.push(
-        <TableHead className="h-12 w-18" key="actions-header"></TableHead>,
+        <TableHead
+            className={cn("h-12", actionClass)}
+            key="actions-header"
+        ></TableHead>,
     );
 
     let loadingTips = <></>;
@@ -388,7 +385,18 @@ export default function Model() {
                 );
             });
             fields.push(
-                <TableCell key="actions-cell" className="h-14 w-18">
+                <TableCell
+                    key="actions-cell"
+                    className={cn("h-14", actionClass)}
+                >
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="cursor-pointer"
+                        onClick={() => goToView(id)}
+                    >
+                        <EyeIcon />
+                    </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button
@@ -404,27 +412,15 @@ export default function Model() {
                             align="start"
                             side="left"
                         >
-                            <DropdownMenuGroup>
-                                <DropdownMenuItem
-                                    className="flex justify-between gap-2 cursor-pointer"
-                                    onClick={() => {
-                                        goToView(id);
-                                    }}
-                                >
-                                    {i18nModel("view")}
-                                    <EyeIcon />
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                    className="flex justify-between gap-2 cursor-pointer"
-                                    onClick={() => {
-                                        goToEdit(id);
-                                    }}
-                                >
-                                    {i18nModel("edit")}
-                                    <FilePenLineIcon />
-                                </DropdownMenuItem>
-                            </DropdownMenuGroup>
-                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                                className="flex justify-between gap-2 cursor-pointer"
+                                onClick={() => {
+                                    goToEdit(id);
+                                }}
+                            >
+                                {i18nModel("edit")}
+                                <FilePenLineIcon />
+                            </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="flex justify-between gap-2 cursor-pointer"
                                 onClick={() => {
@@ -443,7 +439,9 @@ export default function Model() {
             return <TableRow key={`${item.id} `}>{fields}</TableRow>;
         });
     }
-    const pageCount = Math.ceil(modelCount / getQueryOptions(searchParams).limit);
+    const pageCount = Math.ceil(
+        modelCount / getQueryOptions(searchParams).limit,
+    );
 
     const renderPagination = () => {
         if (modelCount < 0) {
@@ -623,8 +621,15 @@ export default function Model() {
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel className="cursor-pointer">{i18nModel("cancel")}</AlertDialogCancel>
-                        <AlertDialogAction className="cursor-pointer" onClick={handleDelete}>{i18nModel("continue")}</AlertDialogAction>
+                        <AlertDialogCancel className="cursor-pointer">
+                            {i18nModel("cancel")}
+                        </AlertDialogCancel>
+                        <AlertDialogAction
+                            className="cursor-pointer"
+                            onClick={handleDelete}
+                        >
+                            {i18nModel("continue")}
+                        </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
