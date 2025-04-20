@@ -76,6 +76,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { StatusBadge } from "@/components/model-components";
+import useUserState from "@/states/user";
 
 function formatTableCell(
     i18nModel: (value: string) => string,
@@ -138,6 +139,7 @@ export default function Model() {
         modelViewOptions.hiddenColumns,
     );
     const [keyword, setKeyword] = useState("");
+    const [userInfo] = useUserState(useShallow((state) => [state.data]));
     const [
         initialized,
         model,
@@ -162,6 +164,8 @@ export default function Model() {
         ]),
     );
 
+    // console.dir(schemaView.allow_create);
+
     const [filters, setFilters] = useState<Record<string, string>>({});
     const getQueryOptions = (params: URLSearchParams) => {
         const page = params.get("page");
@@ -178,13 +182,17 @@ export default function Model() {
             return "";
         }
         const item = modelItems.find((item) => item.id === id);
-        const identity = schemaView.schemas.find(
-            (schema) => schema.identity,
-        )?.name;
-        if (item && identity) {
-            return `${item[identity]}`;
+        if (!item) {
+            return "";
         }
-        return "";
+        const identityArr: string[] = [];
+
+        schemaView.schemas.forEach((schema) => {
+            if (schema.identity) {
+                identityArr.push(toString(item[schema.name]));
+            }
+        });
+        return identityArr.join("-");
     };
 
     const updatePage = (page: number) => {
@@ -259,6 +267,24 @@ export default function Model() {
                 model: modelName,
             });
         }
+    };
+
+    const allowCreate = () => {
+        if (!userInfo.account || !schemaView.allow_create) {
+            return false;
+        }
+        const { roles, groups } = schemaView.allow_create;
+        if (roles.includes("*")) {
+            return true;
+        }
+        if (roles.some((role) => userInfo.roles?.includes(role))) {
+            return true;
+        }
+        if (groups.some((group) => userInfo.groups?.includes(group))) {
+            return true;
+        }
+
+        return false;
     };
 
     useAsync(async () => {
@@ -592,6 +618,12 @@ export default function Model() {
             </Select>
         );
     });
+
+    let tableBtnLayerClass = "justify-end";
+    if (allowCreate()) {
+        tableBtnLayerClass = "justify-between";
+    }
+
     return (
         <div>
             <AlertDialog
@@ -680,7 +712,18 @@ export default function Model() {
                     </TableBody>
                 </Table>
             </div>
-            <div className="flex items-center justify-end mt-4">
+            <div className={cn("flex items-center mt-4", tableBtnLayerClass)}>
+                {allowCreate() && (
+                    <Button
+                        variant="outline"
+                        className="cursor-pointer"
+                        onClick={() => {
+                            goToEdit(0);
+                        }}
+                    >
+                        {i18nModel("create")}
+                    </Button>
+                )}
                 <div className="flex items-center space-x-6 lg:space-x-8">
                     <Select
                         defaultValue={getQueryOptions(

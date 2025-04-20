@@ -7,6 +7,7 @@ import {
     LogInIcon,
     FileIcon,
     HomeIcon,
+    CogIcon,
 } from "lucide-react";
 import { HOME, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
@@ -82,6 +83,12 @@ function getMainNav(roles: string[]) {
                     url: `${MODEL}/user`,
                     roles: ["su", "admin"],
                     icon: UsersIcon,
+                },
+                {
+                    title: "config",
+                    url: `${MODEL}/configuration`,
+                    roles: ["su", "admin"],
+                    icon: CogIcon,
                 },
             ],
         },

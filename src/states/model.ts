@@ -5,6 +5,7 @@ import {
     MODEL_DELETE,
     MODEL_DETAIL,
     MODEL_UPDATE,
+    MODEL_CREATE,
 } from "@/constants/url";
 import request from "@/helpers/request";
 import { isNil } from "lodash-es";
@@ -40,6 +41,7 @@ export interface Schema {
     name: string;
     category: Category;
     read_only: boolean;
+    auto_create: boolean;
     required: boolean;
     identity: boolean;
     fixed: boolean;
@@ -47,12 +49,21 @@ export interface Schema {
     hidden: boolean;
     sortable: boolean;
     filterable: boolean;
+    span: number;
+    allow_create: {
+        groups: string[];
+        roles: string[];
+    };
 }
 
 export interface SchemaView {
     schemas: Schema[];
     conditions: Condition[];
     sort_fields: string[];
+    allow_create: {
+        groups: string[];
+        roles: string[];
+    };
 }
 
 interface ModelState {
@@ -80,6 +91,10 @@ interface ModelState {
         model: string;
         data: Record<string, unknown>;
     }) => Promise<void>;
+    create: (params: {
+        model: string;
+        data: Record<string, unknown>;
+    }) => Promise<{ id: number }>;
 }
 
 const useModelState = create<ModelState>((set, get) => ({
@@ -215,6 +230,16 @@ const useModelState = create<ModelState>((set, get) => ({
         data: Record<string, unknown>;
     }) => {
         await request.patch(MODEL_UPDATE, params);
+    },
+    create: async (params: {
+        model: string;
+        data: Record<string, unknown>;
+    }) => {
+        const { data } = await request.post<{ id: number }>(
+            MODEL_CREATE,
+            params,
+        );
+        return data;
     },
 }));
 

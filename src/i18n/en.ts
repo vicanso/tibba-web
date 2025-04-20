@@ -7,6 +7,7 @@ const sidebar = {
     loginHistory: "Login History",
     modelFeature: "Model",
     file: "File",
+    config: "Config",
 };
 const login = {
     title: "Login",
@@ -80,6 +81,7 @@ const model = {
         "This action cannot be undone. This will permanently delete your account and remove your data from our servers.",
     cancel: "Cancel",
     continue: "Continue",
+    create: "Create",
 };
 
 const modelEditor = {
@@ -87,6 +89,7 @@ const modelEditor = {
     back: "Back",
     noChange: "No changes to update",
     updateSuccess: "Update successfully",
+    createSuccess: "Create successfully",
 };
 
 export default {

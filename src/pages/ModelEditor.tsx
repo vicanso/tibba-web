@@ -24,28 +24,53 @@ import {
     FormItem,
     FormLabel,
 } from "@/components/ui/form";
+import dayjs from "dayjs";
+import { DateTimePickerField } from "@/components/date-time-picker";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+enum EditType {
+    Edit = "edit",
+    Create = "create",
+    View = "view",
+}
 
 export default function ModelEditor() {
     const i18nModelEditor = useI18n("modelEditor");
     const i18nModel = useI18n("model");
     const [searchParams] = useSearchParams();
-    const { name: modelName, id: modelId } = useParams();
+    const { name: modelName, id } = useParams();
     const [initialized, setInitialized] = useState(false);
     const [detail, setDetail] = useState<Record<string, unknown>>({});
-    const [schemaView, fetchSchema, modelDetail, modelUpdate] = useModelState(
-        useShallow((state) => [
-            state.schemaView,
-            state.fetchSchema,
-            state.detail,
-            state.update,
-        ]),
-    );
+    const [schemaView, fetchSchema, modelDetail, modelUpdate, modelCreate] =
+        useModelState(
+            useShallow((state) => [
+                state.schemaView,
+                state.fetchSchema,
+                state.detail,
+                state.update,
+                state.create,
+            ]),
+        );
+    const modelId = Number(id);
+    let editType = EditType.View;
+    if (searchParams.get("type") === "edit") {
+        if (modelId === 0) {
+            editType = EditType.Create;
+        } else {
+            editType = EditType.Edit;
+        }
+    }
+
     const zodSchema: Record<string, z.ZodTypeAny> = {};
     schemaView.schemas?.forEach((item) => {
         const { name, category, read_only, required } = item;
-        if (read_only) {
+        if (editType === EditType.Create && item.auto_create) {
             return;
         }
+        if (editType !== EditType.Create && read_only) {
+            return;
+        }
+
         switch (category) {
             case Category.Strings: {
                 zodSchema[name] = z.array(z.string());
@@ -74,9 +99,10 @@ export default function ModelEditor() {
     const form = useForm({
         resolver: zodResolver(z.object(zodSchema)),
         defaultValues: detail,
+        mode: "onChange",
     });
 
-    async function onSubmit(values: Record<string, unknown>) {
+    async function handleUpdate(values: Record<string, unknown>) {
         const updateData: Record<string, unknown> = {};
         Object.keys(form.formState.dirtyFields).forEach((key) => {
             if (form.formState.dirtyFields[key]) {
@@ -87,9 +113,10 @@ export default function ModelEditor() {
             toast.info(i18nModelEditor("noChange"));
             return;
         }
+
         try {
             await modelUpdate({
-                id: Number(modelId),
+                id: modelId,
                 model: modelName || "",
                 data: updateData,
             });
@@ -98,18 +125,39 @@ export default function ModelEditor() {
             toast.error(formatError(err));
         }
     }
+    async function handleCreate(values: Record<string, unknown>) {
+        try {
+            await modelCreate({
+                model: modelName || "",
+                data: values,
+            });
+            toast.success(i18nModelEditor("createSuccess"));
+        } catch (err) {
+            toast.error(formatError(err));
+        }
+    }
+
+    function onSubmit(values: Record<string, unknown>) {
+        if (editType === EditType.Create) {
+            handleCreate(values);
+        } else {
+            handleUpdate(values);
+        }
+    }
 
     useAsync(async () => {
         try {
-            const model = modelName || "";
             const id = Number(modelId);
+            const model = modelName || "";
             await fetchSchema(model);
-            const data = await modelDetail({
-                id,
-                model,
-            });
-            setDetail(data);
-            form.reset(data);
+            if (id) {
+                const data = await modelDetail({
+                    id,
+                    model,
+                });
+                setDetail(data);
+                form.reset(data);
+            }
         } catch (err) {
             toast.error(formatError(err));
         } finally {
@@ -121,12 +169,29 @@ export default function ModelEditor() {
         return <Loading />;
     }
 
-    const editing = searchParams.get("type") === "edit";
     const formItems = schemaView.schemas
-        .filter((schema) => schema.name !== "id")
+        .filter((schema) => {
+            if (schema.name === "id") {
+                return false;
+            }
+            if (editType === EditType.Create && schema.auto_create) {
+                return false;
+            }
+            if (
+                editType === EditType.Edit &&
+                ["created", "modified"].includes(schema.name)
+            ) {
+                return false;
+            }
+            return true;
+        })
         .map((schema) => {
             const { name, category, options } = schema;
-            const disabled = !editing || schema.read_only;
+            let disabled = editType == EditType.View;
+            if (editType === EditType.Edit) {
+                disabled = schema.read_only;
+            }
+
             const value = toString(detail[name]);
             let valueField = (
                 <FormField
@@ -138,6 +203,7 @@ export default function ModelEditor() {
                             <FormControl>
                                 <Input
                                     {...field}
+                                    value={field.value || ""}
                                     disabled={disabled}
                                     readOnly={disabled}
                                 />
@@ -165,7 +231,14 @@ export default function ModelEditor() {
                     />
                 );
             }
-            if (editing) {
+            let canEdit = true;
+            if (editType === EditType.View) {
+                canEdit = false;
+            }
+            if (editType === EditType.Edit && schema.read_only) {
+                canEdit = false;
+            }
+            if (canEdit) {
                 switch (category) {
                     case Category.Strings: {
                         valueField = (
@@ -220,10 +293,63 @@ export default function ModelEditor() {
                         );
                         break;
                     }
+                    case Category.Date: {
+                        valueField = (
+                            <FormField
+                                control={form.control}
+                                name={name}
+                                render={({ field }) => (
+                                    <DateTimePickerField
+                                        name={name}
+                                        label={name}
+                                        date={field.value}
+                                        setDate={(date) => {
+                                            if (date) {
+                                                field.onChange(
+                                                    dayjs(date).format(
+                                                        "YYYY-MM-DDTHH:mm:ssZ",
+                                                    ),
+                                                );
+                                            } else {
+                                                field.onChange(null);
+                                            }
+                                        }}
+                                    />
+                                )}
+                            />
+                        );
+                        break;
+                    }
+                    case Category.Json: {
+                        valueField = (
+                            <FormField
+                                control={form.control}
+                                name={name}
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>{name}</FormLabel>
+                                        <FormControl>
+                                            <Textarea
+                                                {...field}
+                                                value={field.value || ""}
+                                                disabled={disabled}
+                                                readOnly={disabled}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
+                                )}
+                            />
+                        );
+                        break;
+                    }
                 }
             }
+            const span = schema.span || 1;
             return (
-                <div className="grid gap-2" key={name}>
+                <div
+                    className={cn("grid gap-2", `col-span-${span}`)}
+                    key={name}
+                >
                     {valueField}
                 </div>
             );
@@ -232,13 +358,13 @@ export default function ModelEditor() {
         <div>
             <h1>
                 {modelName?.toUpperCase()}{" "}
-                <Badge variant="secondary">{toString(detail.id)}</Badge>
+                {modelId !== 0 && <Badge variant="secondary">{modelId}</Badge>}
             </h1>
             <Form {...form}>
                 <form className="mt-4" onSubmit={form.handleSubmit(onSubmit)}>
                     <div className="grid grid-cols-2 gap-4">{formItems}</div>
                     <div className="flex gap-4 w-full mt-4">
-                        {editing && (
+                        {editType !== EditType.View && (
                             <Button
                                 className=" mb-4 cursor-pointer flex-1"
                                 type="submit"
@@ -250,7 +376,10 @@ export default function ModelEditor() {
                         <Button
                             className="mb-4 cursor-pointer flex-1"
                             variant="secondary"
-                            onClick={() => goBack()}
+                            onClick={(e) => {
+                                e.preventDefault();
+                                goBack();
+                            }}
                         >
                             {i18nModelEditor("back")}
                         </Button>
