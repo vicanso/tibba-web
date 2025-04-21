@@ -114,7 +114,18 @@
     * {
         @apply border-border outline-ring/50;
     }
+
     body {
         @apply bg-background text-foreground;
+    }
+
+    button,
+    [role="button"],
+    a,
+    select,
+    input[type="submit"],
+    input[type="button"],
+    input[type="reset"] {
+        @apply cursor-pointer;
     }
 }

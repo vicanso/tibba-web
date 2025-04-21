@@ -25,9 +25,18 @@ import {
     FormLabel,
 } from "@/components/ui/form";
 import dayjs from "dayjs";
-import { DateTimePickerField } from "@/components/date-time-picker";
+import { DateTimePicker } from "@/components/date-time-picker";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import {
+    Select,
+    SelectContent,
+    SelectGroup,
+    SelectItem,
+    SelectLabel,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 enum EditType {
     Edit = "edit",
     Create = "create",
@@ -299,22 +308,26 @@ export default function ModelEditor() {
                                 control={form.control}
                                 name={name}
                                 render={({ field }) => (
-                                    <DateTimePickerField
-                                        name={name}
-                                        label={name}
-                                        date={field.value}
-                                        setDate={(date) => {
-                                            if (date) {
-                                                field.onChange(
-                                                    dayjs(date).format(
-                                                        "YYYY-MM-DDTHH:mm:ssZ",
-                                                    ),
-                                                );
-                                            } else {
-                                                field.onChange(null);
-                                            }
-                                        }}
-                                    />
+                                    <FormItem>
+                                        <FormLabel>{name}</FormLabel>
+                                        <FormControl>
+                                            <DateTimePicker
+                                                {...field}
+                                                date={field.value}
+                                                setDate={(date) => {
+                                                    if (date) {
+                                                        field.onChange(
+                                                            dayjs(date).format(
+                                                                "YYYY-MM-DDTHH:mm:ssZ",
+                                                            ),
+                                                        );
+                                                    } else {
+                                                        field.onChange(null);
+                                                    }
+                                                }}
+                                            />
+                                        </FormControl>
+                                    </FormItem>
                                 )}
                             />
                         );
@@ -342,12 +355,71 @@ export default function ModelEditor() {
                         );
                         break;
                     }
+                    default: {
+                        if (options) {
+                            valueField = (
+                                <FormField
+                                    control={form.control}
+                                    name={name}
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>{name}</FormLabel>
+                                            <FormControl>
+                                                <Select
+                                                    {...field}
+                                                    onValueChange={(value) => {
+                                                        field.onChange(value);
+                                                    }}
+                                                >
+                                                    <SelectTrigger className="w-full">
+                                                        <SelectValue
+                                                            placeholder={name}
+                                                        />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectGroup>
+                                                            <SelectLabel>
+                                                                {name}
+                                                            </SelectLabel>
+                                                            {options.map(
+                                                                (option) => (
+                                                                    <SelectItem
+                                                                        key={
+                                                                            option.value
+                                                                        }
+                                                                        value={
+                                                                            option.value
+                                                                        }
+                                                                    >
+                                                                        {
+                                                                            option.label
+                                                                        }
+                                                                    </SelectItem>
+                                                                ),
+                                                            )}
+                                                        </SelectGroup>
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormControl>
+                                        </FormItem>
+                                    )}
+                                />
+                            );
+                        }
+                        break;
+                    }
                 }
             }
             const span = schema.span || 1;
             return (
                 <div
-                    className={cn("grid gap-2", `col-span-${span}`)}
+                    className={cn(
+                        "gap-2",
+                        span === 1 ? "col-span-1" : "",
+                        span === 2 ? "col-span-2" : "",
+                        span === 3 ? "col-span-3" : "",
+                        span === 4 ? "col-span-4" : "",
+                    )}
                     key={name}
                 >
                     {valueField}
@@ -366,7 +438,7 @@ export default function ModelEditor() {
                     <div className="flex gap-4 w-full mt-4">
                         {editType !== EditType.View && (
                             <Button
-                                className=" mb-4 cursor-pointer flex-1"
+                                className=" mb-4 flex-1"
                                 type="submit"
                                 disabled={!form.formState.isDirty}
                             >
@@ -374,7 +446,7 @@ export default function ModelEditor() {
                             </Button>
                         )}
                         <Button
-                            className="mb-4 cursor-pointer flex-1"
+                            className="mb-4 flex-1"
                             variant="secondary"
                             onClick={(e) => {
                                 e.preventDefault();

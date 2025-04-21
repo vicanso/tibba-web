@@ -1,6 +1,6 @@
 import * as React from "react";
 import dayjs from "dayjs";
-import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -9,14 +9,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from "@/components/ui/select";
-
+import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 interface DateTimePickerProps {
     date: Date | undefined;
     setDate: (date: Date | undefined) => void;
@@ -28,13 +21,14 @@ export function DateTimePicker({
     setDate,
     className,
 }: DateTimePickerProps) {
+    const currentDate = dayjs(date);
     // 使用 ref 来跟踪是否是用户手动更改时间
     const isUserTimeChange = React.useRef(false);
 
     // 从日期中提取时间
     const getTimeFromDate = (date: Date | undefined) => {
         if (!date) return "";
-        return dayjs(date).format("HH:mm");
+        return currentDate.format("HH:mm");
     };
 
     // 初始时间状态
@@ -96,73 +90,109 @@ export function DateTimePicker({
                         >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {date ? (
-                                dayjs(date).format("YYYY-MM-DD")
+                                currentDate.format("YYYY-MM-DD HH:mm")
                             ) : (
                                 <span>Pick a date</span>
                             )}
                         </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
-                        <Calendar
-                            mode="single"
-                            selected={date}
-                            onSelect={handleDateChange}
-                            initialFocus
-                        />
+                        <div className="sm:flex">
+                            <Calendar
+                                mode="single"
+                                selected={date}
+                                onSelect={handleDateChange}
+                                initialFocus
+                                footer={
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                setDate(new Date());
+                                            }}
+                                        >
+                                            Now
+                                        </Button>
+                                    </div>
+                                }
+                            />
+                            <div className="flex flex-col sm:flex-row sm:h-[305px] divide-y sm:divide-y-0 sm:divide-x">
+                                <ScrollArea className="w-64 sm:w-auto">
+                                    <div className="flex sm:flex-col p-2">
+                                        {Array.from({ length: 24 }, (_, i) => i)
+                                            .reverse()
+                                            .map((hour) => (
+                                                <Button
+                                                    key={hour}
+                                                    size="icon"
+                                                    variant={
+                                                        date &&
+                                                        currentDate.hour() ===
+                                                            hour
+                                                            ? "secondary"
+                                                            : "ghost"
+                                                    }
+                                                    className="sm:w-full shrink-0 aspect-square"
+                                                    onClick={() =>
+                                                        handleTimeChange(
+                                                            hour.toString(),
+                                                            currentDate
+                                                                .minute()
+                                                                .toString(),
+                                                        )
+                                                    }
+                                                >
+                                                    {hour}
+                                                </Button>
+                                            ))}
+                                    </div>
+                                    <ScrollBar
+                                        orientation="horizontal"
+                                        className="sm:hidden"
+                                    />
+                                </ScrollArea>
+                                <ScrollArea className="w-64 sm:w-auto">
+                                    <div className="flex sm:flex-col p-2">
+                                        {Array.from(
+                                            { length: 12 },
+                                            (_, i) => i * 5,
+                                        ).map((minute) => (
+                                            <Button
+                                                key={minute}
+                                                size="icon"
+                                                variant={
+                                                    date &&
+                                                    currentDate.minute() ===
+                                                        minute
+                                                        ? "secondary"
+                                                        : "ghost"
+                                                }
+                                                className="sm:w-full shrink-0 aspect-square"
+                                                onClick={() =>
+                                                    handleTimeChange(
+                                                        currentDate
+                                                            .hour()
+                                                            .toString(),
+                                                        minute.toString(),
+                                                    )
+                                                }
+                                            >
+                                                {minute
+                                                    .toString()
+                                                    .padStart(2, "0")}
+                                            </Button>
+                                        ))}
+                                    </div>
+                                    <ScrollBar
+                                        orientation="horizontal"
+                                        className="sm:hidden"
+                                    />
+                                </ScrollArea>
+                            </div>
+                        </div>
                     </PopoverContent>
                 </Popover>
-            </div>
-            <div className="flex items-center gap-2 flex-shrink-0">
-                <Clock className="h-4 w-4 text-muted-foreground" />
-                <div className="flex items-center gap-2">
-                    <Select
-                        value={selectedTime ? selectedTime.split(":")[0] : ""}
-                        onValueChange={(value) => {
-                            const minutes = selectedTime
-                                ? selectedTime.split(":")[1]
-                                : "00";
-                            handleTimeChange(value, minutes);
-                        }}
-                    >
-                        <SelectTrigger className="w-[70px]">
-                            <SelectValue placeholder="Hour" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Array.from({ length: 24 }, (_, i) => (
-                                <SelectItem
-                                    key={i}
-                                    value={i.toString().padStart(2, "0")}
-                                >
-                                    {i.toString().padStart(2, "0")}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <span>:</span>
-                    <Select
-                        value={selectedTime ? selectedTime.split(":")[1] : ""}
-                        onValueChange={(value) => {
-                            const hours = selectedTime
-                                ? selectedTime.split(":")[0]
-                                : "00";
-                            handleTimeChange(hours, value);
-                        }}
-                    >
-                        <SelectTrigger className="w-[70px]">
-                            <SelectValue placeholder="Minute" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {Array.from({ length: 60 }, (_, i) => (
-                                <SelectItem
-                                    key={i}
-                                    value={i.toString().padStart(2, "0")}
-                                >
-                                    {i.toString().padStart(2, "0")}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                </div>
             </div>
         </div>
     );

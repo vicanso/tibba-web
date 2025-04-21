@@ -106,6 +106,20 @@ function formatTableCell(
             );
             className += " w-[100px]";
             break;
+        case Category.Json: {
+            let isJson = false;
+            try {
+                const json = JSON.parse(value as string);
+                value = JSON.stringify(json, null, 2);
+                isJson = true;
+            } catch (error) {
+                console.error(error);
+            }
+            if (isJson) {
+                element = <pre>{value}</pre>;
+            }
+            break;
+        }
         case Category.Strings:
             {
                 const arr = toArray(data).map((item) => {
@@ -418,18 +432,13 @@ export default function Model() {
                     <Button
                         variant="ghost"
                         size="icon"
-                        className="cursor-pointer"
                         onClick={() => goToView(id)}
                     >
                         <EyeIcon />
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                className="cursor-pointer"
-                            >
+                            <Button variant="ghost" size="icon">
                                 <EllipsisIcon />
                             </Button>
                         </DropdownMenuTrigger>
@@ -716,7 +725,6 @@ export default function Model() {
                 {allowCreate() && (
                     <Button
                         variant="outline"
-                        className="cursor-pointer"
                         onClick={() => {
                             goToEdit(0);
                         }}
