@@ -46,6 +46,7 @@ enum EditType {
 export default function ModelEditor() {
     const i18nModelEditor = useI18n("modelEditor");
     const i18nModel = useI18n("model");
+    const i18nComponent = useI18n("component");
     const [searchParams] = useSearchParams();
     const { name: modelName, id } = useParams();
     const [initialized, setInitialized] = useState(false);
@@ -111,6 +112,32 @@ export default function ModelEditor() {
         mode: "onChange",
     });
 
+    function formatValue(values: Record<string, unknown>) {
+        const categoryDict: Record<string, Category> = {};
+        schemaView.schemas?.forEach((schema) => {
+            const { name, category } = schema;
+            categoryDict[name] = category;
+        });
+        const data: Record<string, unknown> = {};
+
+        Object.keys(values).forEach((key) => {
+            switch (categoryDict[key]) {
+                case Category.Json: {
+                    data[key] = JSON.parse(values[key] as string);
+                    break;
+                }
+                case Category.Number: {
+                    data[key] = Number(values[key]);
+                    break;
+                }
+                default:
+                    data[key] = values[key];
+                    break;
+            }
+        });
+        return data;
+    }
+
     async function handleUpdate(values: Record<string, unknown>) {
         const updateData: Record<string, unknown> = {};
         Object.keys(form.formState.dirtyFields).forEach((key) => {
@@ -127,7 +154,7 @@ export default function ModelEditor() {
             await modelUpdate({
                 id: modelId,
                 model: modelName || "",
-                data: updateData,
+                data: formatValue(updateData),
             });
             toast.success(i18nModelEditor("updateSuccess"));
         } catch (err) {
@@ -138,7 +165,7 @@ export default function ModelEditor() {
         try {
             await modelCreate({
                 model: modelName || "",
-                data: values,
+                data: formatValue(values),
             });
             toast.success(i18nModelEditor("createSuccess"));
         } catch (err) {
@@ -206,19 +233,32 @@ export default function ModelEditor() {
                 <FormField
                     control={form.control}
                     name={name}
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>{name}</FormLabel>
-                            <FormControl>
-                                <Input
+                    render={({ field }) => {
+                        let dom = (
+                            <Input
+                                {...field}
+                                value={field.value || ""}
+                                disabled={disabled}
+                                readOnly={disabled}
+                            />
+                        );
+                        if (category === Category.Json) {
+                            dom = (
+                                <Textarea
                                     {...field}
                                     value={field.value || ""}
                                     disabled={disabled}
                                     readOnly={disabled}
                                 />
-                            </FormControl>
-                        </FormItem>
-                    )}
+                            );
+                        }
+                        return (
+                            <FormItem>
+                                <FormLabel>{name}</FormLabel>
+                                <FormControl>{dom}</FormControl>
+                            </FormItem>
+                        );
+                    }}
                 />
             );
             if (category === Category.Status) {
@@ -314,6 +354,7 @@ export default function ModelEditor() {
                                             <DateTimePicker
                                                 {...field}
                                                 date={field.value}
+                                                i18n={i18nComponent}
                                                 setDate={(date) => {
                                                     if (date) {
                                                         field.onChange(

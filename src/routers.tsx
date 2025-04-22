@@ -7,6 +7,7 @@ import SignUp from "@/pages/SignUp";
 import Profile from "@/pages/Profile";
 import Model from "@/pages/Model";
 import ModelEditor from "@/pages/ModelEditor";
+import FileUploader from "@/pages/FileUploader";
 
 import {
     LOGIN_HISTORY,
@@ -16,6 +17,7 @@ import {
     PROFILE,
     MODEL,
     MODEL_EDITOR,
+    FILE_UPLOADER,
 } from "@/constants/route";
 
 const router = createHashRouter([
@@ -50,6 +52,10 @@ const router = createHashRouter([
             {
                 path: `${MODEL_EDITOR}/:name/:id`,
                 element: <ModelEditor />,
+            },
+            {
+                path: `${FILE_UPLOADER}`,
+                element: <FileUploader />,
             },
         ],
     },

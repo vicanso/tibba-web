@@ -1,6 +1,6 @@
 import * as React from "react";
 import dayjs from "dayjs";
-import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -14,16 +14,25 @@ interface DateTimePickerProps {
     date: Date | undefined;
     setDate: (date: Date | undefined) => void;
     className?: string;
+    i18n?: (key: string) => string;
 }
 
 export function DateTimePicker({
     date,
     setDate,
     className,
+    i18n,
 }: DateTimePickerProps) {
     const currentDate = dayjs(date);
     // 使用 ref 来跟踪是否是用户手动更改时间
     const isUserTimeChange = React.useRef(false);
+
+    const handleI18n = (key: string) => {
+        if (i18n) {
+            return i18n(key);
+        }
+        return key;
+    };
 
     // 从日期中提取时间
     const getTimeFromDate = (date: Date | undefined) => {
@@ -92,7 +101,7 @@ export function DateTimePicker({
                             {date ? (
                                 currentDate.format("YYYY-MM-DD HH:mm")
                             ) : (
-                                <span>Pick a date</span>
+                                <span>{handleI18n("pickDate")}</span>
                             )}
                         </Button>
                     </PopoverTrigger>
@@ -109,10 +118,32 @@ export function DateTimePicker({
                                             variant="outline"
                                             size="sm"
                                             onClick={() => {
+                                                const date = new Date();
+                                                date.setFullYear(date.getFullYear() - 1);
+                                                setDate(date);
+                                            }}
+                                        >
+                                            <ChevronsLeftIcon className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                const date = new Date();
+                                                date.setFullYear(date.getFullYear() + 1);
+                                                setDate(date);
+                                            }}
+                                        >
+                                            <ChevronsRightIcon className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
                                                 setDate(new Date());
                                             }}
                                         >
-                                            Now
+                                            {handleI18n("now")}
                                         </Button>
                                     </div>
                                 }
@@ -128,7 +159,7 @@ export function DateTimePicker({
                                                     size="icon"
                                                     variant={
                                                         date &&
-                                                        currentDate.hour() ===
+                                                            currentDate.hour() ===
                                                             hour
                                                             ? "secondary"
                                                             : "ghost"
@@ -163,7 +194,7 @@ export function DateTimePicker({
                                                 size="icon"
                                                 variant={
                                                     date &&
-                                                    currentDate.minute() ===
+                                                        currentDate.minute() ===
                                                         minute
                                                         ? "secondary"
                                                         : "ghost"
@@ -198,42 +229,3 @@ export function DateTimePicker({
     );
 }
 
-// 表单字段版本，用于与 react-hook-form 集成
-interface DateTimePickerFieldProps extends DateTimePickerProps {
-    name: string;
-    label?: string;
-    error?: boolean;
-    helperText?: string;
-}
-
-export function DateTimePickerField({
-    name,
-    label,
-    error,
-    helperText,
-    ...props
-}: DateTimePickerFieldProps) {
-    return (
-        <div className="grid gap-1.5">
-            {label && (
-                <label
-                    htmlFor={name}
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                >
-                    {label}
-                </label>
-            )}
-            <DateTimePicker {...props} />
-            {helperText && (
-                <p
-                    className={cn(
-                        "text-sm",
-                        error ? "text-destructive" : "text-muted-foreground",
-                    )}
-                >
-                    {helperText}
-                </p>
-            )}
-        </div>
-    );
-}

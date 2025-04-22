@@ -63,7 +63,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getModelViewOptions, setModelViewOptions } from "@/storage";
 import { Badge } from "@/components/ui/badge";
-import { MODEL_EDITOR } from "@/constants/route";
+import { FILE_UPLOADER, MODEL_EDITOR } from "@/constants/route";
 import { goTo } from "@/routers";
 import {
     AlertDialog,
@@ -726,7 +726,18 @@ export default function Model() {
                     <Button
                         variant="outline"
                         onClick={() => {
-                            goToEdit(0);
+                            if (modelName === "file") {
+                                let groups: string[] = [];
+                                schemaView.schemas.forEach((schema) => {
+                                    if (schema.name === "group") {
+                                        groups = schema.options?.map((item) => item.value) || [];
+                                    }
+                                });
+
+                                goTo(FILE_UPLOADER + "?groups=" + groups.join(","));
+                            } else {
+                                goToEdit(0);
+                            }
                         }}
                     >
                         {i18nModel("create")}

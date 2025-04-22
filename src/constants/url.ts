@@ -15,3 +15,5 @@ export const MODEL_DELETE = "/models/delete";
 export const MODEL_DETAIL = "/models/detail";
 export const MODEL_UPDATE = "/models/update";
 export const MODEL_CREATE = "/models/create";
+
+export const FILE_UPLOAD = "/files/upload";

@@ -92,6 +92,19 @@ const modelEditor = {
     createSuccess: "Create successfully",
 };
 
+const component = {
+    now: "Now",
+    pickDate: "Pick a date",
+    dragUpload: "Drag & drop files here",
+    clickUpload: "Or click to browse (max 2 files, up to 5MB each)",
+    browseFiles: "Browse files",
+    upload: "Upload",
+    uploadedSuccessfully: "Uploaded successfully",
+    group: "Group",
+    selectGroup: "Select a group",
+    files: "Files",
+}
+
 export default {
     common,
     sidebar,
@@ -101,4 +114,5 @@ export default {
     profile,
     model,
     modelEditor,
+    component,
 };
