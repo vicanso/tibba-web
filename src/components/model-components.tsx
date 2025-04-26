@@ -1,6 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Label } from "@radix-ui/react-label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toString } from "lodash-es";
 
 export function StatusBadge({
     status,
@@ -10,7 +11,7 @@ export function StatusBadge({
     i18nModel: (value: string) => string;
 }) {
     let element = <></>;
-    if (status === "1") {
+    if (toString(status) === "1") {
         element = (
             <Badge variant="default" className="bg-blue-500 text-white h-6">
                 {i18nModel("active")}

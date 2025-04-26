@@ -32,7 +32,7 @@ import {
     TrashIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { toArray, toString, upperFirst } from "lodash-es";
+import { isObjectLike, toArray, toString, upperFirst } from "lodash-es";
 import { useI18n } from "@/i18n";
 import bytes from "bytes";
 import {
@@ -77,6 +77,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { StatusBadge } from "@/components/model-components";
 import useUserState from "@/states/user";
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger,
+} from "@/components/ui/popover";
+import SmartImage from "@/components/smart-image";
 
 function formatTableCell(
     i18nModel: (value: string) => string,
@@ -84,6 +90,9 @@ function formatTableCell(
     data: unknown,
 ) {
     let value = toString(data);
+    if (isObjectLike(data)) {
+        value = JSON.stringify(data, null, 2);
+    }
     let className = "";
     if (schema.fixed) {
         className = "sticky left-0 bg-background z-10";
@@ -424,18 +433,46 @@ export default function Model() {
                     </TableCell>
                 );
             });
+            let viewBtn = (
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => goToView(id)}
+                >
+                    <EyeIcon />
+                </Button>
+            );
+            if (modelName === "file" && item.content_type) {
+                const isImage = (item.content_type as string).startsWith(
+                    "image/",
+                );
+                viewBtn = (
+                    <Popover>
+                        <PopoverTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                                <EyeIcon />
+                            </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[480px]" align="end">
+                            {isImage ? (
+                                <SmartImage
+                                    src={`/api/files/preview?name=${item.filename}`}
+                                    width={Number(item.image_width)}
+                                    height={Number(item.image_height)}
+                                />
+                            ) : (
+                                <div>Preview Not Supported</div>
+                            )}
+                        </PopoverContent>
+                    </Popover>
+                );
+            }
             fields.push(
                 <TableCell
                     key="actions-cell"
                     className={cn("h-14", actionClass)}
                 >
-                    <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => goToView(id)}
-                    >
-                        <EyeIcon />
-                    </Button>
+                    {viewBtn}
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="ghost" size="icon">
@@ -730,11 +767,18 @@ export default function Model() {
                                 let groups: string[] = [];
                                 schemaView.schemas.forEach((schema) => {
                                     if (schema.name === "group") {
-                                        groups = schema.options?.map((item) => item.value) || [];
+                                        groups =
+                                            schema.options?.map(
+                                                (item) => item.value,
+                                            ) || [];
                                     }
                                 });
 
-                                goTo(FILE_UPLOADER + "?groups=" + groups.join(","));
+                                goTo(
+                                    FILE_UPLOADER +
+                                        "?groups=" +
+                                        groups.join(","),
+                                );
                             } else {
                                 goToEdit(0);
                             }

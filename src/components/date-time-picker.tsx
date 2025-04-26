@@ -1,6 +1,10 @@
 import * as React from "react";
 import dayjs from "dayjs";
-import { Calendar as CalendarIcon, ChevronsLeftIcon, ChevronsRightIcon } from "lucide-react";
+import {
+    Calendar as CalendarIcon,
+    ChevronsLeftIcon,
+    ChevronsRightIcon,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
@@ -118,9 +122,17 @@ export function DateTimePicker({
                                             variant="outline"
                                             size="sm"
                                             onClick={() => {
-                                                const date = new Date();
-                                                date.setFullYear(date.getFullYear() - 1);
-                                                setDate(date);
+                                                let selectedDate = new Date();
+                                                if (currentDate.isValid()) {
+                                                    selectedDate = new Date(
+                                                        currentDate.valueOf(),
+                                                    );
+                                                }
+                                                selectedDate.setFullYear(
+                                                    selectedDate.getFullYear() -
+                                                        1,
+                                                );
+                                                setDate(selectedDate);
                                             }}
                                         >
                                             <ChevronsLeftIcon className="h-4 w-4" />
@@ -129,9 +141,17 @@ export function DateTimePicker({
                                             variant="outline"
                                             size="sm"
                                             onClick={() => {
-                                                const date = new Date();
-                                                date.setFullYear(date.getFullYear() + 1);
-                                                setDate(date);
+                                                let selectedDate = new Date();
+                                                if (currentDate.isValid()) {
+                                                    selectedDate = new Date(
+                                                        currentDate.valueOf(),
+                                                    );
+                                                }
+                                                selectedDate.setFullYear(
+                                                    selectedDate.getFullYear() +
+                                                        1,
+                                                );
+                                                setDate(selectedDate);
                                             }}
                                         >
                                             <ChevronsRightIcon className="h-4 w-4" />
@@ -159,7 +179,7 @@ export function DateTimePicker({
                                                     size="icon"
                                                     variant={
                                                         date &&
-                                                            currentDate.hour() ===
+                                                        currentDate.hour() ===
                                                             hour
                                                             ? "secondary"
                                                             : "ghost"
@@ -194,7 +214,7 @@ export function DateTimePicker({
                                                 size="icon"
                                                 variant={
                                                     date &&
-                                                        currentDate.minute() ===
+                                                    currentDate.minute() ===
                                                         minute
                                                         ? "secondary"
                                                         : "ghost"
@@ -228,4 +248,3 @@ export function DateTimePicker({
         </div>
     );
 }
-

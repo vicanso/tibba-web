@@ -12,7 +12,13 @@ import {
     FileUploadTrigger,
 } from "@/components/ui/file-upload";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select";
 import { FILE_UPLOAD } from "@/constants/url";
 import { useI18n } from "@/i18n";
 import { Upload, X, Loader2Icon } from "lucide-react";
@@ -22,7 +28,6 @@ import { toast } from "sonner";
 import request from "@/helpers/request";
 import { formatError } from "@/helpers/util";
 
-
 export default function FileUploader() {
     const i18n = useI18n("component");
     const [searchParams] = useSearchParams();
@@ -31,7 +36,6 @@ export default function FileUploader() {
     const [processing, setProcessing] = React.useState<boolean>(false);
 
     const groups = searchParams.get("groups")?.split(",") || [];
-
 
     const onFileReject = React.useCallback((file: File, message: string) => {
         toast(message, {
@@ -46,7 +50,7 @@ export default function FileUploader() {
         setProcessing(true);
         try {
             await request.postForm(`${FILE_UPLOAD}?group=${group}`, {
-                'files[]': files,
+                "files[]": files,
             });
             toast.success(i18n("uploadedSuccessfully"));
             setFiles([]);
@@ -55,7 +59,7 @@ export default function FileUploader() {
         } finally {
             setProcessing(false);
         }
-    }
+    };
 
     return (
         <div className="grid grid-cols-2 gap-4">
@@ -76,8 +80,15 @@ export default function FileUploader() {
             </div>
             <div className="col-span-1">
                 <Label className="mb-2">{i18n("upload")}</Label>
-                <Button variant="outline" className="w-full" disabled={group === "" || files.length === 0 || processing} onClick={handleUpload}>
-                    {processing && <Loader2Icon className="size-4 animate-spin" />}
+                <Button
+                    variant="outline"
+                    className="w-full"
+                    disabled={group === "" || files.length === 0 || processing}
+                    onClick={handleUpload}
+                >
+                    {processing && (
+                        <Loader2Icon className="size-4 animate-spin" />
+                    )}
                     {i18n("upload")}
                 </Button>
             </div>
@@ -98,24 +109,38 @@ export default function FileUploader() {
                             <div className="flex items-center justify-center rounded-full border p-2.5">
                                 <Upload className="size-6 text-muted-foreground" />
                             </div>
-                            <p className="font-medium text-sm">{i18n("dragUpload")}</p>
+                            <p className="font-medium text-sm">
+                                {i18n("dragUpload")}
+                            </p>
                             <p className="text-muted-foreground text-xs">
                                 {i18n("clickUpload")}
                             </p>
                         </div>
                         <FileUploadTrigger asChild>
-                            <Button variant="outline" size="sm" className="mt-2 w-fit">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="mt-2 w-fit"
+                            >
                                 {i18n("browseFiles")}
                             </Button>
                         </FileUploadTrigger>
                     </FileUploadDropzone>
                     <FileUploadList className="grid grid-cols-2">
                         {files.map((file, index) => (
-                            <FileUploadItem className="col-span-1" key={index} value={file}>
+                            <FileUploadItem
+                                className="col-span-1"
+                                key={index}
+                                value={file}
+                            >
                                 <FileUploadItemPreview />
                                 <FileUploadItemMetadata />
                                 <FileUploadItemDelete asChild>
-                                    <Button variant="ghost" size="icon" className="size-7">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="size-7"
+                                    >
                                         <X />
                                     </Button>
                                 </FileUploadItemDelete>

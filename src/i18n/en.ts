@@ -86,6 +86,7 @@ const model = {
 
 const modelEditor = {
     update: "Update",
+    create: "Create",
     back: "Back",
     noChange: "No changes to update",
     updateSuccess: "Update successfully",
@@ -103,7 +104,7 @@ const component = {
     group: "Group",
     selectGroup: "Select a group",
     files: "Files",
-}
+};
 
 export default {
     common,

@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { formatError } from "@/helpers/util";
 import { useI18n } from "@/i18n";
 import { goBack } from "@/routers";
-import useModelState, { Category } from "@/states/model";
+import useModelState, { Category, SchemaView } from "@/states/model";
 import { useParams, useSearchParams } from "react-router";
 import { useShallow } from "zustand/react/shallow";
 import { useAsync } from "react-async-hook";
@@ -10,11 +10,11 @@ import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Loading } from "@/components/loading";
-import { toString } from "lodash-es";
 import { MultiSelect } from "@/components/multi-select";
 import { Badge } from "@/components/ui/badge";
 import { StatusBadge, StatusRadioGroup } from "@/components/model-components";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2Icon } from "lucide-react";
 import * as z from "zod";
 import { useForm } from "react-hook-form";
 import {
@@ -37,6 +37,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import { isObjectLike, toString } from "lodash-es";
 enum EditType {
     Edit = "edit",
     Create = "create",
@@ -50,6 +51,7 @@ export default function ModelEditor() {
     const [searchParams] = useSearchParams();
     const { name: modelName, id } = useParams();
     const [initialized, setInitialized] = useState(false);
+    const [processing, setProcessing] = useState(false);
     const [detail, setDetail] = useState<Record<string, unknown>>({});
     const [schemaView, fetchSchema, modelDetail, modelUpdate, modelCreate] =
         useModelState(
@@ -70,7 +72,6 @@ export default function ModelEditor() {
             editType = EditType.Edit;
         }
     }
-
     const zodSchema: Record<string, z.ZodTypeAny> = {};
     schemaView.schemas?.forEach((item) => {
         const { name, category, read_only, required } = item;
@@ -138,6 +139,36 @@ export default function ModelEditor() {
         return data;
     }
 
+    function formatFormValue(
+        schemaView: SchemaView,
+        values: Record<string, unknown>,
+    ) {
+        const categoryDict: Record<string, Category> = {};
+        schemaView.schemas?.forEach((schema) => {
+            const { name, category } = schema;
+            categoryDict[name] = category;
+        });
+        const data: Record<string, unknown> = {};
+
+        Object.keys(values).forEach((key) => {
+            switch (categoryDict[key]) {
+                case Category.Json: {
+                    const value = values[key];
+                    if (value && isObjectLike(value)) {
+                        data[key] = JSON.stringify(value, null, 2);
+                    } else {
+                        data[key] = value;
+                    }
+                    break;
+                }
+                default:
+                    data[key] = values[key];
+                    break;
+            }
+        });
+        return data;
+    }
+
     async function handleUpdate(values: Record<string, unknown>) {
         const updateData: Record<string, unknown> = {};
         Object.keys(form.formState.dirtyFields).forEach((key) => {
@@ -150,34 +181,37 @@ export default function ModelEditor() {
             return;
         }
 
-        try {
-            await modelUpdate({
-                id: modelId,
-                model: modelName || "",
-                data: formatValue(updateData),
-            });
-            toast.success(i18nModelEditor("updateSuccess"));
-        } catch (err) {
-            toast.error(formatError(err));
-        }
+        await modelUpdate({
+            id: modelId,
+            model: modelName || "",
+            data: formatValue(updateData),
+        });
+        toast.success(i18nModelEditor("updateSuccess"));
     }
     async function handleCreate(values: Record<string, unknown>) {
-        try {
-            await modelCreate({
-                model: modelName || "",
-                data: formatValue(values),
-            });
-            toast.success(i18nModelEditor("createSuccess"));
-        } catch (err) {
-            toast.error(formatError(err));
-        }
+        await modelCreate({
+            model: modelName || "",
+            data: formatValue(values),
+        });
+        toast.success(i18nModelEditor("createSuccess"));
+        goBack();
     }
 
-    function onSubmit(values: Record<string, unknown>) {
-        if (editType === EditType.Create) {
-            handleCreate(values);
-        } else {
-            handleUpdate(values);
+    async function onSubmit(values: Record<string, unknown>) {
+        if (processing) {
+            return;
+        }
+        setProcessing(true);
+        try {
+            if (editType === EditType.Create) {
+                await handleCreate(values);
+            } else {
+                await handleUpdate(values);
+            }
+        } catch (err) {
+            toast.error(formatError(err));
+        } finally {
+            setProcessing(false);
         }
     }
 
@@ -185,14 +219,14 @@ export default function ModelEditor() {
         try {
             const id = Number(modelId);
             const model = modelName || "";
-            await fetchSchema(model);
+            const schema = await fetchSchema(model);
             if (id) {
                 const data = await modelDetail({
                     id,
                     model,
                 });
                 setDetail(data);
-                form.reset(data);
+                form.reset(formatFormValue(schema, data));
             }
         } catch (err) {
             toast.error(formatError(err));
@@ -227,8 +261,6 @@ export default function ModelEditor() {
             if (editType === EditType.Edit) {
                 disabled = schema.read_only;
             }
-
-            const value = toString(detail[name]);
             let valueField = (
                 <FormField
                     control={form.control}
@@ -266,12 +298,12 @@ export default function ModelEditor() {
                     <FormField
                         control={form.control}
                         name={name}
-                        render={() => (
+                        render={({ field }) => (
                             <FormItem>
                                 <FormLabel>{name}</FormLabel>
                                 <FormControl>
                                     <StatusBadge
-                                        status={value}
+                                        status={toString(field.value)}
                                         i18nModel={i18nModel}
                                     />
                                 </FormControl>
@@ -327,7 +359,7 @@ export default function ModelEditor() {
                                         <FormControl>
                                             <StatusRadioGroup
                                                 {...field}
-                                                status={value}
+                                                status={toString(field.value)}
                                                 i18nModel={i18nModel}
                                                 onValueChange={(value) =>
                                                     field.onChange(
@@ -483,7 +515,12 @@ export default function ModelEditor() {
                                 type="submit"
                                 disabled={!form.formState.isDirty}
                             >
-                                {i18nModelEditor("update")}
+                                {processing && (
+                                    <Loader2Icon className="size-4 animate-spin mr-2" />
+                                )}
+                                {editType === EditType.Create
+                                    ? i18nModelEditor("create")
+                                    : i18nModelEditor("update")}
                             </Button>
                         )}
                         <Button
