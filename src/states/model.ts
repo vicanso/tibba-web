@@ -49,6 +49,7 @@ export interface Schema {
     hidden: boolean;
     sortable: boolean;
     filterable: boolean;
+    popover: boolean;
     span: number;
     allow_create: {
         groups: string[];

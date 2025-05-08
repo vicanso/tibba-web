@@ -30,6 +30,7 @@ import {
     EyeIcon,
     FilePenLineIcon,
     TrashIcon,
+    CodeXmlIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { isObjectLike, toArray, toString, upperFirst } from "lodash-es";
@@ -143,6 +144,20 @@ function formatTableCell(
             break;
         default:
             break;
+    }
+    if (schema.popover && value) {
+        element = (
+            <Popover>
+                <PopoverTrigger asChild>
+                    <Button variant="ghost" size="icon">
+                        <CodeXmlIcon />
+                    </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-[480px]" align="end">
+                    {element}
+                </PopoverContent>
+            </Popover>
+        );
     }
     return { element, className };
 }
@@ -671,7 +686,7 @@ export default function Model() {
     }
 
     return (
-        <div>
+        <div className="flex flex-col h-full">
             <AlertDialog
                 open={openDeleteDialog}
                 onOpenChange={(open) => {
@@ -711,7 +726,7 @@ export default function Model() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-4 sticky top-0 bg-background z-20 py-2 shadow-sm">
                 <Input
                     className="w-[200px]"
                     placeholder={i18nModel("keywordPlaceholder")}
@@ -748,7 +763,7 @@ export default function Model() {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
-            <div className="rounded-md border">
+            <div className="rounded-md border flex-grow overflow-auto">
                 <Table>
                     <TableHeader>
                         <TableRow>{headers}</TableRow>
@@ -758,7 +773,7 @@ export default function Model() {
                     </TableBody>
                 </Table>
             </div>
-            <div className={cn("flex items-center mt-4", tableBtnLayerClass)}>
+            <div className={cn("flex items-center mt-4 sticky bottom-0 bg-background py-2 z-10 shadow-md", tableBtnLayerClass)}>
                 {allowCreate() && (
                     <Button
                         variant="outline"
@@ -776,8 +791,8 @@ export default function Model() {
 
                                 goTo(
                                     FILE_UPLOADER +
-                                        "?groups=" +
-                                        groups.join(","),
+                                    "?groups=" +
+                                    groups.join(","),
                                 );
                             } else {
                                 goToEdit(0);
