@@ -4,8 +4,7 @@ import {
     InputOTPGroup,
     InputOTPSlot,
 } from "@/components/ui/input-otp";
-import { useState } from "react";
-import { useAsync } from "react-async-hook";
+import { useEffect, useState, useCallback } from "react";
 import useCommonState from "@/states/common";
 import { useShallow } from "zustand/react/shallow";
 import { toast } from "sonner";
@@ -24,7 +23,7 @@ export function Captcha({ className, onChange }: CaptchaProps) {
         id: "",
         data: "",
     });
-    const refreshCaptcha = async () => {
+    const refreshCaptcha = useCallback(async () => {
         setCaptcha({
             id: "",
             data: "",
@@ -39,9 +38,11 @@ export function Captcha({ className, onChange }: CaptchaProps) {
                 data: "",
             });
         }
-    };
+    }, [fetchCaptcha]);
 
-    useAsync(refreshCaptcha, []);
+    useEffect(() => {
+        refreshCaptcha();
+    }, [refreshCaptcha]);
 
     return (
         <div className={cn("flex items-center gap-2", className)}>

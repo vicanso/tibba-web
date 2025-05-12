@@ -1,3 +1,4 @@
+import { getSelectedApp, setSelectedApp } from "@/storage";
 import { create } from "zustand";
 export interface PageNavigation {
     url?: string;
@@ -7,17 +8,45 @@ export interface PageNavigation {
 
 const pageHeaderNavigation: PageNavigation[] = [];
 
+
+export interface App {
+    name: string;
+    label: string;
+}
+
 interface BasicState {
-    apps: string[];
+    apps: App[];
+    selectedApp: string;
     pageHeaderNavigation: PageNavigation[];
     setPageHeaderNavigation: (nav: PageNavigation[]) => void;
     resetPageHeaderNavigation: () => void;
     setTitle: (title: string) => void;
+    selectApp: (app: string) => void;
+}
+
+const defaultApps: App[] = [
+    {
+        name: "tibbaWeb",
+        label: "Tibba Web",
+    },
+    {
+        name: "tibbaAdmin",
+        label: "Tibba Admin",
+    }
+];
+
+function getDefaultApp() {
+    const app = getSelectedApp();
+    if (app) {
+        return app;
+    }
+    return defaultApps[0].name;
 }
 
 const useBasicState = create<BasicState>((set) => ({
-    apps: ["Tibba Web", "Tibba Admin"],
+    apps: defaultApps,
     pageHeaderNavigation,
+    selectedApp: getDefaultApp(),
     setTitle: (title: string) => {
         set({
             pageHeaderNavigation: [
@@ -26,6 +55,12 @@ const useBasicState = create<BasicState>((set) => ({
                 },
             ],
         });
+    },
+    selectApp: (app: string) => {
+        set({
+            selectedApp: app,
+        });
+        setSelectedApp(app);
     },
     setPageHeaderNavigation: (nav: PageNavigation[]) => {
         set({

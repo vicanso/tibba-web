@@ -14,16 +14,22 @@ import {
     SidebarFooter,
 } from "@/components/ui/sidebar";
 import { AppUser } from "@/components/app-user";
-import useBasicState from "@/states/basic";
 import { useShallow } from "zustand/react/shallow";
 import { useI18n } from "@/i18n";
 import { Link } from "react-router";
 import { useLocation } from "react-router";
 import useUserState from "@/states/user";
+import useBasicState from "@/states/basic";
+import { useEffect } from "react";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const location = useLocation();
-    const [apps] = useBasicState(useShallow((state) => [state.apps]));
-    const [mainNav] = useUserState(useShallow((state) => [state.mainNav]));
+    const [selectedApp] = useBasicState(useShallow((state) => [state.selectedApp]));
+    const [user] = useUserState(useShallow((state) => [state.data]));
+    const [mainNav, updateMainNav] = useUserState(useShallow((state) => [state.mainNav, state.updateMainNav]));
+
+    useEffect(() => {
+        updateMainNav(selectedApp, user.roles || []);
+    }, [selectedApp, updateMainNav, user.roles]);
 
     const sidebarI18n = useI18n("sidebar");
     const isActive = (url: string) => {
@@ -33,7 +39,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return (
         <Sidebar collapsible="icon" {...props}>
             <SidebarHeader>
-                <AppSwitcher apps={apps} defaultApp={apps[0]} />
+                <AppSwitcher />
             </SidebarHeader>
             <SidebarContent>
                 {mainNav.map((item) => (

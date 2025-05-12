@@ -149,8 +149,9 @@ function formatTableCell(
         element = (
             <Popover>
                 <PopoverTrigger asChild>
-                    <Button variant="ghost" size="icon">
+                    <Button variant="ghost">
                         <CodeXmlIcon />
+                        {`${value.length} characters`}
                     </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-[480px]" align="end">
@@ -202,7 +203,6 @@ export default function Model() {
         ]),
     );
 
-    // console.dir(schemaView.allow_create);
 
     const [filters, setFilters] = useState<Record<string, string>>({});
     const getQueryOptions = (params: URLSearchParams) => {

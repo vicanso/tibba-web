@@ -50,51 +50,81 @@ interface NavGroup {
     items: NavItem[];
 }
 
-function getMainNav(roles: string[]) {
-    const defaultMainNav: NavGroup[] = [
-        {
-            title: "userFeature",
-            url: "#",
-            items: [
-                {
-                    title: "home",
-                    url: HOME,
-                    icon: HomeIcon,
-                },
-                {
-                    title: "loginHistory",
-                    url: LOGIN_HISTORY,
-                    roles: ["su", "admin"],
-                    icon: LogInIcon,
-                },
-            ],
-        },
-        {
-            title: "modelFeature",
-            url: "#",
-            items: [
-                {
-                    title: "file",
-                    url: `${MODEL}/file`,
-                    icon: FileIcon,
-                },
-                {
-                    title: "user",
-                    url: `${MODEL}/user`,
-                    roles: ["su", "admin"],
-                    icon: UsersIcon,
-                },
-                {
-                    title: "config",
-                    url: `${MODEL}/configuration`,
-                    roles: ["su", "admin"],
-                    icon: CogIcon,
-                },
-            ],
-        },
-    ];
+const adminMainNav: NavGroup[] = [
+    {
+        title: "userFeature",
+        url: "#",
+        items: [
+            {
+                title: "loginHistory",
+                url: LOGIN_HISTORY,
+                roles: ["su", "admin"],
+                icon: LogInIcon,
+            },
+        ],
+    },
+    {
+        title: "modelFeature",
+        url: "#",
+        items: [
+            {
+                title: "user",
+                url: `${MODEL}/user`,
+                roles: ["su", "admin"],
+                icon: UsersIcon,
+            },
+            {
+                title: "config",
+                url: `${MODEL}/configuration`,
+                roles: ["su", "admin"],
+                icon: CogIcon,
+            },
+        ],
+    },
+];
+
+const webMainNav: NavGroup[] = [
+    {
+        title: "userFeature",
+        url: "#",
+        items: [
+            {
+                title: "home",
+                url: HOME,
+                icon: HomeIcon,
+            },
+        ],
+    },
+    {
+        title: "modelFeature",
+        url: "#",
+        items: [
+            {
+                title: "file",
+                url: `${MODEL}/file`,
+                icon: FileIcon,
+            },
+            {
+                title: "http detector",
+                url: `${MODEL}/http_detector`,
+                icon: FileIcon,
+            }
+        ],
+    },
+];
+
+function getMainNav(app: string, roles: string[]) {
+    let mainNav = webMainNav;
+    switch (app) {
+        case "tibbaAdmin":
+            mainNav = adminMainNav;
+            break;
+        case "tibbaWeb":
+            mainNav = webMainNav;
+            break;
+    };
     const result: NavGroup[] = [];
-    defaultMainNav.forEach((nav) => {
+    mainNav.forEach((nav) => {
         const items = nav.items.filter((item) => {
             if (item.roles) {
                 return item.roles.some((role) => roles.includes(role));
@@ -126,6 +156,7 @@ interface UserState {
     data: UserSession;
     initialized: boolean;
     mainNav: NavGroup[];
+    updateMainNav: (app: string, roles: string[]) => Promise<void>;
     fetch: () => Promise<UserSession>;
     signUp: (account: string, password: string) => Promise<void>;
     login: (
@@ -168,9 +199,13 @@ const useUserState = create<UserState>((set) => ({
         set({
             initialized: true,
             data: user,
-            mainNav: getMainNav(user.roles || []),
         });
         return user;
+    },
+    updateMainNav: async (app: string, roles: string[]) => {
+        set({
+            mainNav: getMainNav(app, roles),
+        });
     },
     signUp: async (account: string, password: string) => {
         await request.post(USER_REGISTER, {

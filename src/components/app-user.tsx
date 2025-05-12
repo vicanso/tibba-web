@@ -32,14 +32,13 @@ import {
     useSidebar,
 } from "@/components/ui/sidebar";
 import useUserState from "@/states/user";
-import { useAsync } from "react-async-hook";
 import { useShallow } from "zustand/react/shallow";
 import { useI18n } from "@/i18n";
 import { toast } from "sonner";
 import { formatError } from "@/helpers/util";
 import { Link } from "react-router";
 import { LOGIN, PROFILE } from "@/constants/route";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useTheme } from "@/components/theme-provider";
 import i18n from "@/i18n";
 import dayjs from "dayjs";
@@ -48,6 +47,7 @@ export function AppUser() {
     const [processing, setProcessing] = useState(false);
     const { setTheme, theme } = useTheme();
     const lang = i18n.language;
+    const { open } = useSidebar();
 
     const commonI18n = useI18n("common");
     const appUserI18n = useI18n("appUser");
@@ -75,7 +75,7 @@ export function AppUser() {
         }
     };
 
-    useAsync(async () => {
+    const handleFetch = useCallback(async () => {
         try {
             const user = await fetch();
             if (user.account && user.can_renew) {
@@ -91,7 +91,12 @@ export function AppUser() {
         } catch (err) {
             toast.error(formatError(err));
         }
-    }, []);
+    }, [fetch, refresh]);
+
+    useEffect(() => {
+        handleFetch();
+    }, [handleFetch]);
+
     const iconClassName = "mr-2 h-4 w-4";
 
     const renderUser = (className: string) => {
@@ -206,13 +211,17 @@ export function AppUser() {
         );
     } else if (!userInfo.account) {
         container = (
-            <Button variant="outline" size="lg" className="w-full">
+            <Button
+                variant={open ? "outline" : "ghost"}
+                size={open ? "lg" : "icon"}
+                className="w-full"
+            >
                 <Link
                     to={LOGIN}
                     className="w-full h-full flex items-center justify-center gap-2"
                 >
                     <LogInIcon />
-                    {appUserI18n("login")}
+                    {open && appUserI18n("login")}
                 </Link>
             </Button>
         );
