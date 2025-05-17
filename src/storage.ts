@@ -1,4 +1,3 @@
-
 export interface ModelViewOptions {
     limit: number;
     hiddenColumns: string[];

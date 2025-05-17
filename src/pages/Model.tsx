@@ -203,7 +203,6 @@ export default function Model() {
         ]),
     );
 
-
     const [filters, setFilters] = useState<Record<string, string>>({});
     const getQueryOptions = (params: URLSearchParams) => {
         const page = params.get("page");
@@ -773,7 +772,12 @@ export default function Model() {
                     </TableBody>
                 </Table>
             </div>
-            <div className={cn("flex items-center mt-4 sticky bottom-0 bg-background py-2 z-10 shadow-md", tableBtnLayerClass)}>
+            <div
+                className={cn(
+                    "flex items-center mt-4 sticky bottom-0 bg-background py-2 z-10 shadow-md",
+                    tableBtnLayerClass,
+                )}
+            >
                 {allowCreate() && (
                     <Button
                         variant="outline"
@@ -791,8 +795,8 @@ export default function Model() {
 
                                 goTo(
                                     FILE_UPLOADER +
-                                    "?groups=" +
-                                    groups.join(","),
+                                        "?groups=" +
+                                        groups.join(","),
                                 );
                             } else {
                                 goToEdit(0);

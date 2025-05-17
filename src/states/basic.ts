@@ -8,7 +8,6 @@ export interface PageNavigation {
 
 const pageHeaderNavigation: PageNavigation[] = [];
 
-
 export interface App {
     name: string;
     label: string;
@@ -32,7 +31,7 @@ const defaultApps: App[] = [
     {
         name: "tibbaAdmin",
         label: "Tibba Admin",
-    }
+    },
 ];
 
 function getDefaultApp() {

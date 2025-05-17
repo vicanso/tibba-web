@@ -16,7 +16,8 @@ import { StatusBadge, StatusRadioGroup } from "@/components/model-components";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon } from "lucide-react";
 import * as z from "zod";
-import { useForm } from "react-hook-form";
+import { useForm, ControllerRenderProps } from "react-hook-form";
+import { Switch } from "@/components/ui/switch";
 import {
     Form,
     FormControl,
@@ -37,7 +38,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { isObjectLike, toString } from "lodash-es";
+import { isNil, isObjectLike, toString } from "lodash-es";
 enum EditType {
     Edit = "edit",
     Create = "create",
@@ -122,17 +123,21 @@ export default function ModelEditor() {
         const data: Record<string, unknown> = {};
 
         Object.keys(values).forEach((key) => {
+            const value = values[key];
+            if (isNil(value)) {
+                return;
+            }
             switch (categoryDict[key]) {
                 case Category.Json: {
-                    data[key] = JSON.parse(values[key] as string);
+                    data[key] = JSON.parse(value as string);
                     break;
                 }
                 case Category.Number: {
-                    data[key] = Number(values[key]);
+                    data[key] = Number(value);
                     break;
                 }
                 default:
-                    data[key] = values[key];
+                    data[key] = value;
                     break;
             }
         });
@@ -239,6 +244,24 @@ export default function ModelEditor() {
         return <Loading />;
     }
 
+    const renderFormField = (
+        name: string,
+        fn: (field: ControllerRenderProps) => React.ReactNode,
+    ) => {
+        return (
+            <FormField
+                control={form.control}
+                name={name}
+                render={({ field }) => (
+                    <FormItem>
+                        <FormLabel>{name}</FormLabel>
+                        <FormControl>{fn(field)}</FormControl>
+                    </FormItem>
+                )}
+            />
+        );
+    };
+
     const formItems = schemaView.schemas
         .filter((schema) => {
             if (schema.name === "id") {
@@ -261,56 +284,37 @@ export default function ModelEditor() {
             if (editType === EditType.Edit) {
                 disabled = schema.read_only;
             }
-            let valueField = (
-                <FormField
-                    control={form.control}
-                    name={name}
-                    render={({ field }) => {
-                        let dom = (
-                            <Input
-                                {...field}
-                                value={field.value || ""}
-                                disabled={disabled}
-                                readOnly={disabled}
-                            />
-                        );
-                        if (category === Category.Json) {
-                            dom = (
-                                <Textarea
-                                    {...field}
-                                    value={field.value || ""}
-                                    disabled={disabled}
-                                    readOnly={disabled}
-                                />
-                            );
-                        }
-                        return (
-                            <FormItem>
-                                <FormLabel>{name}</FormLabel>
-                                <FormControl>{dom}</FormControl>
-                            </FormItem>
-                        );
-                    }}
-                />
-            );
-            if (category === Category.Status) {
-                valueField = (
-                    <FormField
-                        control={form.control}
-                        name={name}
-                        render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>{name}</FormLabel>
-                                <FormControl>
-                                    <StatusBadge
-                                        status={toString(field.value)}
-                                        i18nModel={i18nModel}
-                                    />
-                                </FormControl>
-                            </FormItem>
-                        )}
+            let valueField = renderFormField(name, (field) => {
+                let dom = (
+                    <Input
+                        {...field}
+                        value={field.value || ""}
+                        disabled={disabled}
+                        readOnly={disabled}
                     />
                 );
+                if (category === Category.Json) {
+                    dom = (
+                        <Textarea
+                            {...field}
+                            value={field.value || ""}
+                            disabled={disabled}
+                            readOnly={disabled}
+                        />
+                    );
+                }
+                return dom;
+            });
+
+            if (category === Category.Status) {
+                valueField = renderFormField(name, (field) => {
+                    return (
+                        <StatusBadge
+                            status={toString(field.value)}
+                            i18nModel={i18nModel}
+                        />
+                    );
+                });
             }
             let canEdit = true;
             if (editType === EditType.View) {
@@ -322,162 +326,130 @@ export default function ModelEditor() {
             if (canEdit) {
                 switch (category) {
                     case Category.Strings: {
-                        valueField = (
-                            <FormField
-                                control={form.control}
-                                name={name}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{name}</FormLabel>
-                                        <FormControl>
-                                            <MultiSelect
-                                                {...field}
-                                                disabled={disabled}
-                                                options={options || []}
-                                                selected={
-                                                    form.getValues(name) || []
-                                                }
-                                                onChange={(value) =>
-                                                    field.onChange(value)
-                                                }
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                        );
+                        if (options) {
+                            valueField = renderFormField(name, (field) => {
+                                return (
+                                    <MultiSelect
+                                        {...field}
+                                        disabled={disabled}
+                                        options={options || []}
+                                        selected={form.getValues(name) || []}
+                                        onChange={(value) =>
+                                            field.onChange(value)
+                                        }
+                                    />
+                                );
+                            });
+                        } else {
+                            valueField = renderFormField(name, (field) => {
+                                return (
+                                    <Textarea
+                                        {...field}
+                                        value={field.value || ""}
+                                        disabled={disabled}
+                                        readOnly={disabled}
+                                    />
+                                );
+                            });
+                        }
                         break;
                     }
                     case Category.Status: {
-                        valueField = (
-                            <FormField
-                                control={form.control}
-                                name={name}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{name}</FormLabel>
-                                        <FormControl>
-                                            <StatusRadioGroup
-                                                {...field}
-                                                status={toString(field.value)}
-                                                i18nModel={i18nModel}
-                                                onValueChange={(value) =>
-                                                    field.onChange(
-                                                        Number(value),
-                                                    )
-                                                }
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                        );
+                        valueField = renderFormField(name, (field) => {
+                            return (
+                                <StatusRadioGroup
+                                    {...field}
+                                    status={toString(field.value)}
+                                    i18nModel={i18nModel}
+                                    onValueChange={(value) =>
+                                        field.onChange(Number(value))
+                                    }
+                                />
+                            );
+                        });
+                        break;
+                    }
+                    case Category.Boolean: {
+                        valueField = renderFormField(name, (field) => {
+                            return (
+                                <Switch
+                                    className="mt-2"
+                                    {...field}
+                                    onCheckedChange={(value) => {
+                                        field.onChange(value);
+                                    }}
+                                />
+                            );
+                        });
                         break;
                     }
                     case Category.Date: {
-                        valueField = (
-                            <FormField
-                                control={form.control}
-                                name={name}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{name}</FormLabel>
-                                        <FormControl>
-                                            <DateTimePicker
-                                                {...field}
-                                                date={field.value}
-                                                i18n={i18nComponent}
-                                                setDate={(date) => {
-                                                    if (date) {
-                                                        field.onChange(
-                                                            dayjs(date).format(
-                                                                "YYYY-MM-DDTHH:mm:ssZ",
-                                                            ),
-                                                        );
-                                                    } else {
-                                                        field.onChange(null);
-                                                    }
-                                                }}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                        );
+                        valueField = renderFormField(name, (field) => {
+                            return (
+                                <DateTimePicker
+                                    {...field}
+                                    date={field.value}
+                                    i18n={i18nComponent}
+                                    setDate={(date) => {
+                                        if (date) {
+                                            field.onChange(
+                                                dayjs(date).format(
+                                                    "YYYY-MM-DDTHH:mm:ssZ",
+                                                ),
+                                            );
+                                        } else {
+                                            field.onChange(null);
+                                        }
+                                    }}
+                                />
+                            );
+                        });
                         break;
                     }
                     case Category.Json: {
-                        valueField = (
-                            <FormField
-                                control={form.control}
-                                name={name}
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>{name}</FormLabel>
-                                        <FormControl>
-                                            <Textarea
-                                                {...field}
-                                                value={field.value || ""}
-                                                disabled={disabled}
-                                                readOnly={disabled}
-                                            />
-                                        </FormControl>
-                                    </FormItem>
-                                )}
-                            />
-                        );
+                        valueField = renderFormField(name, (field) => {
+                            return (
+                                <Textarea
+                                    {...field}
+                                    value={field.value || ""}
+                                    disabled={disabled}
+                                    readOnly={disabled}
+                                />
+                            );
+                        });
                         break;
                     }
                     default: {
                         if (options) {
-                            valueField = (
-                                <FormField
-                                    control={form.control}
-                                    name={name}
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>{name}</FormLabel>
-                                            <FormControl>
-                                                <Select
-                                                    {...field}
-                                                    onValueChange={(value) => {
-                                                        field.onChange(value);
-                                                    }}
-                                                >
-                                                    <SelectTrigger className="w-full">
-                                                        <SelectValue
-                                                            placeholder={name}
-                                                        />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectGroup>
-                                                            <SelectLabel>
-                                                                {name}
-                                                            </SelectLabel>
-                                                            {options.map(
-                                                                (option) => (
-                                                                    <SelectItem
-                                                                        key={
-                                                                            option.value
-                                                                        }
-                                                                        value={
-                                                                            option.value
-                                                                        }
-                                                                    >
-                                                                        {
-                                                                            option.label
-                                                                        }
-                                                                    </SelectItem>
-                                                                ),
-                                                            )}
-                                                        </SelectGroup>
-                                                    </SelectContent>
-                                                </Select>
-                                            </FormControl>
-                                        </FormItem>
-                                    )}
-                                />
-                            );
+                            valueField = renderFormField(name, (field) => {
+                                return (
+                                    <Select
+                                        {...field}
+                                        onValueChange={(value) => {
+                                            field.onChange(value);
+                                        }}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder={name} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>
+                                                    {name}
+                                                </SelectLabel>
+                                                {options.map((option) => (
+                                                    <SelectItem
+                                                        key={option.value}
+                                                        value={option.value}
+                                                    >
+                                                        {option.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                );
+                            });
                         }
                         break;
                     }

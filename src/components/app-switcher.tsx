@@ -15,11 +15,13 @@ import useBasicState from "@/states/basic";
 import { useShallow } from "zustand/react/shallow";
 
 export function AppSwitcher() {
-    const [apps, selectedApp, selectApp] = useBasicState(useShallow((state) => [state.apps, state.selectedApp, state.selectApp]));
+    const [apps, selectedApp, selectApp] = useBasicState(
+        useShallow((state) => [state.apps, state.selectedApp, state.selectApp]),
+    );
 
     const getSelectedApp = () => {
         return apps.find((app) => app.name === selectedApp);
-    }
+    };
 
     if (apps.length <= 1) {
         return (
@@ -50,7 +52,9 @@ export function AppSwitcher() {
                                 <GalleryVerticalEnd className="size-4" />
                             </div>
                             <div className="flex flex-col gap-0.5 leading-none">
-                                <span className="">{getSelectedApp()?.label}</span>
+                                <span className="">
+                                    {getSelectedApp()?.label}
+                                </span>
                             </div>
                             <ChevronsUpDown className="ml-auto" />
                         </SidebarMenuButton>

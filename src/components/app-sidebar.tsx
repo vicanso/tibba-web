@@ -23,13 +23,25 @@ import useBasicState from "@/states/basic";
 import { useEffect } from "react";
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     const location = useLocation();
-    const [selectedApp] = useBasicState(useShallow((state) => [state.selectedApp]));
+    const [selectedApp] = useBasicState(
+        useShallow((state) => [state.selectedApp]),
+    );
     const [user] = useUserState(useShallow((state) => [state.data]));
-    const [mainNav, updateMainNav] = useUserState(useShallow((state) => [state.mainNav, state.updateMainNav]));
+    const [mainNav, updateMainNav, resetMainNav] = useUserState(
+        useShallow((state) => [
+            state.mainNav,
+            state.updateMainNav,
+            state.resetMainNav,
+        ]),
+    );
 
     useEffect(() => {
-        updateMainNav(selectedApp, user.roles || []);
-    }, [selectedApp, updateMainNav, user.roles]);
+        if (user.account) {
+            updateMainNav(selectedApp, user.roles || []);
+        } else {
+            resetMainNav();
+        }
+    }, [selectedApp, updateMainNav, user.account, user.roles, resetMainNav]);
 
     const sidebarI18n = useI18n("sidebar");
     const isActive = (url: string) => {

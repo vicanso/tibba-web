@@ -8,6 +8,7 @@ const sidebar = {
     modelFeature: "Model",
     file: "File",
     config: "Config",
+    httpDetector: "Http Detector",
 };
 const login = {
     title: "Login",

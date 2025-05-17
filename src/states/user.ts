@@ -8,6 +8,7 @@ import {
     FileIcon,
     HomeIcon,
     CogIcon,
+    LandPlotIcon,
 } from "lucide-react";
 import { HOME, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
@@ -105,10 +106,10 @@ const webMainNav: NavGroup[] = [
                 icon: FileIcon,
             },
             {
-                title: "http detector",
+                title: "httpDetector",
                 url: `${MODEL}/http_detector`,
-                icon: FileIcon,
-            }
+                icon: LandPlotIcon,
+            },
         ],
     },
 ];
@@ -122,7 +123,7 @@ function getMainNav(app: string, roles: string[]) {
         case "tibbaWeb":
             mainNav = webMainNav;
             break;
-    };
+    }
     const result: NavGroup[] = [];
     mainNav.forEach((nav) => {
         const items = nav.items.filter((item) => {
@@ -157,6 +158,7 @@ interface UserState {
     initialized: boolean;
     mainNav: NavGroup[];
     updateMainNav: (app: string, roles: string[]) => Promise<void>;
+    resetMainNav: () => void;
     fetch: () => Promise<UserSession>;
     signUp: (account: string, password: string) => Promise<void>;
     login: (
@@ -207,6 +209,11 @@ const useUserState = create<UserState>((set) => ({
             mainNav: getMainNav(app, roles),
         });
     },
+    resetMainNav: () => {
+        set({
+            mainNav: [],
+        });
+    },
     signUp: async (account: string, password: string) => {
         await request.post(USER_REGISTER, {
             account,
@@ -238,7 +245,6 @@ const useUserState = create<UserState>((set) => ({
         set({
             initialized: true,
             data: user,
-            mainNav: getMainNav(user.roles || []),
         });
         return user;
     },

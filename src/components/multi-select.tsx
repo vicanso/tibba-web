@@ -36,7 +36,7 @@ export function MultiSelect({
     return (
         <Popover open={disabled ? false : open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
-                <div className="border rounded-md p-2 flex flex-wrap gap-1">
+                <div className="border rounded-md p-2 flex flex-wrap gap-1 cursor-pointer">
                     {selected.map((value) => (
                         <Badge key={value} variant="secondary">
                             {options.find((opt) => opt.value === value)?.label}
@@ -54,7 +54,13 @@ export function MultiSelect({
                             </button>
                         </Badge>
                     ))}
-                    <button className="text-sm text-muted-foreground">
+                    <button
+                        className="text-sm text-muted-foreground"
+                        onClick={(e) => {
+                            setOpen(true);
+                            e.preventDefault();
+                        }}
+                    >
                         Select items...
                     </button>
                 </div>
