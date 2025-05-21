@@ -55,6 +55,7 @@ export interface Schema {
         groups: string[];
         roles: string[];
     };
+    default_value: unknown;
 }
 
 export interface SchemaView {

@@ -119,9 +119,11 @@ function formatTableCell(
         case Category.Json: {
             let isJson = false;
             try {
-                const json = JSON.parse(value as string);
-                value = JSON.stringify(json, null, 2);
-                isJson = true;
+                if (value) {
+                    const json = JSON.parse(value as string);
+                    value = JSON.stringify(json, null, 2);
+                    isJson = true;
+                }
             } catch (error) {
                 console.error(error);
             }
@@ -355,6 +357,8 @@ export default function Model() {
     const schemas = schemaView.schemas.filter(
         (schema) => !schema.hidden && !hiddenColumns.includes(schema.name),
     );
+    const noColumnKey = "no";
+    const showNoColumn = !hiddenColumns.includes(noColumnKey);
     const headers = schemas.map((schema) => {
         let className = "";
         if (schema.fixed) {
@@ -397,6 +401,13 @@ export default function Model() {
 
     const actionClass = "w-24";
 
+    if (showNoColumn) {
+        headers.unshift(
+            <TableHead className={cn("h-12", actionClass)} key="No">
+                <span className="text-muted-foreground">No</span>
+            </TableHead>,
+        );
+    }
     headers.push(
         <TableHead
             className={cn("h-12", actionClass)}
@@ -429,7 +440,9 @@ export default function Model() {
             </TableRow>
         );
     } else {
-        rows = modelItems.map((item) => {
+        const { page, limit } = getQueryOptions(searchParams);
+        const startIndex = (page - 1) * limit;
+        rows = modelItems.map((item, index) => {
             const id = item.id as number;
             const key = `${id}`;
             const fields = schemas.map((schema) => {
@@ -522,6 +535,13 @@ export default function Model() {
                 </TableCell>,
             );
 
+            if (showNoColumn) {
+                fields.unshift(
+                    <TableCell className={cn("h-14", actionClass)} key="No">
+                        {startIndex + index + 1}
+                    </TableCell>,
+                );
+            }
             return <TableRow key={`${item.id} `}>{fields}</TableRow>;
         });
     }
@@ -609,22 +629,24 @@ export default function Model() {
             </Pagination>
         );
     };
-    const columnFilter = schemaView.schemas
+    const filterColumns = schemaView.schemas
         .filter((schema) => !schema.hidden)
-        .map((schema) => {
-            return (
-                <DropdownMenuCheckboxItem
-                    key={schema.name}
-                    // className="capitalize"
-                    checked={!hiddenColumns.includes(schema.name)}
-                    onCheckedChange={(checked) => {
-                        updateHiddenColumns(schema.name, checked);
-                    }}
-                >
-                    {formatFieldName(schema.name)}
-                </DropdownMenuCheckboxItem>
-            );
-        });
+        .map((schema) => schema.name);
+    filterColumns.unshift(noColumnKey);
+    const columnFilter = filterColumns.map((name) => {
+        return (
+            <DropdownMenuCheckboxItem
+                key={name}
+                // className="capitalize"
+                checked={!hiddenColumns.includes(name)}
+                onCheckedChange={(checked) => {
+                    updateHiddenColumns(name, checked);
+                }}
+            >
+                {formatFieldName(name)}
+            </DropdownMenuCheckboxItem>
+        );
+    });
     const conditions = schemaView.conditions.map((condition) => {
         const { category, options, name } = condition;
         if (category === ConditionCategory.Input) {

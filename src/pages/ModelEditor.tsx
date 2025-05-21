@@ -38,7 +38,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { isNil, isObjectLike, toString } from "lodash-es";
+import { isNil, isObjectLike, isNumber, toString } from "lodash-es";
 enum EditType {
     Edit = "edit",
     Create = "create",
@@ -97,7 +97,7 @@ export default function ModelEditor() {
                 break;
             }
             case Category.Number: {
-                zodSchema[name] = z.number();
+                zodSchema[name] = z.number().min(0);
                 break;
             }
             default:
@@ -129,7 +129,9 @@ export default function ModelEditor() {
             }
             switch (categoryDict[key]) {
                 case Category.Json: {
-                    data[key] = JSON.parse(value as string);
+                    if (value) {
+                        data[key] = JSON.parse(value as string);
+                    }
                     break;
                 }
                 case Category.Number: {
@@ -139,6 +141,17 @@ export default function ModelEditor() {
                 default:
                     data[key] = value;
                     break;
+            }
+        });
+        return data;
+    }
+
+    function formatDefaultValue(schemaView: SchemaView) {
+        const data: Record<string, unknown> = {};
+        schemaView.schemas?.forEach((schema) => {
+            const { name, default_value } = schema;
+            if (!isNil(default_value)) {
+                data[name] = default_value;
             }
         });
         return data;
@@ -232,6 +245,8 @@ export default function ModelEditor() {
                 });
                 setDetail(data);
                 form.reset(formatFormValue(schema, data));
+            } else {
+                form.reset(formatDefaultValue(schema));
             }
         } catch (err) {
             toast.error(formatError(err));
@@ -348,6 +363,10 @@ export default function ModelEditor() {
                                         value={field.value || ""}
                                         disabled={disabled}
                                         readOnly={disabled}
+                                        onChange={(e) => {
+                                            const value = e.target.value.trim();
+                                            field.onChange(value.split(","));
+                                        }}
                                     />
                                 );
                             });
@@ -369,12 +388,38 @@ export default function ModelEditor() {
                         });
                         break;
                     }
+                    case Category.Number: {
+                        valueField = renderFormField(name, (field) => {
+                            return (
+                                <Input
+                                    {...field}
+                                    value={
+                                        field.value === null ||
+                                        field.value === undefined
+                                            ? ""
+                                            : field.value
+                                    }
+                                    disabled={disabled}
+                                    readOnly={disabled}
+                                    type="number"
+                                    onChange={(e) => {
+                                        const value = e.target.value;
+                                        field.onChange(
+                                            value === "" ? null : Number(value),
+                                        );
+                                    }}
+                                />
+                            );
+                        });
+                        break;
+                    }
                     case Category.Boolean: {
                         valueField = renderFormField(name, (field) => {
                             return (
                                 <Switch
                                     className="mt-2"
                                     {...field}
+                                    checked={field.value}
                                     onCheckedChange={(value) => {
                                         field.onChange(value);
                                     }}
