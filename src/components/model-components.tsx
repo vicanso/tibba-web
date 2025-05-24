@@ -28,6 +28,31 @@ export function StatusBadge({
     return element;
 }
 
+export function ResultBadge({
+    result,
+    i18nModel,
+}: {
+    result: string;
+    i18nModel: (value: string) => string;
+}) {
+    let element = <></>;
+    if (result === "1") {
+        element = (
+            <Badge variant="destructive" className="h-6">
+                {i18nModel("failed")}
+            </Badge>
+        );
+    } else {
+        element = (
+            <Badge variant="default" className="bg-blue-500 text-white h-6">
+                {i18nModel("success")}
+            </Badge>
+        );
+    }
+
+    return element;
+}
+
 export function StatusRadioGroup({
     status,
     i18nModel,

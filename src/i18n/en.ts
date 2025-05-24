@@ -8,7 +8,8 @@ const sidebar = {
     modelFeature: "Model",
     file: "File",
     config: "Config",
-    httpDetector: "Http Detector",
+    httpStat: "HttpStat",
+    httpDetector: "HttpDetector",
 };
 const login = {
     title: "Login",
@@ -69,6 +70,8 @@ const model = {
     filter: "Filter",
     active: "Active",
     inactive: "Inactive",
+    success: "Success",
+    failed: "Failed",
     select: "Select",
     input: "Input",
     nextPage: "Next",

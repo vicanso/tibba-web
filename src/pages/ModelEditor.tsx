@@ -38,7 +38,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { isNil, isObjectLike, isNumber, toString } from "lodash-es";
+import { isNil, isObjectLike, toString } from "lodash-es";
 enum EditType {
     Edit = "edit",
     Create = "create",

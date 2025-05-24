@@ -32,6 +32,7 @@ export enum Category {
     Bytes = "bytes",
     Boolean = "boolean",
     Status = "status",
+    Result = "result",
     Strings = "strings",
     Date = "date",
     Json = "json",
@@ -39,6 +40,7 @@ export enum Category {
 
 export interface Schema {
     name: string;
+    label?: string;
     category: Category;
     read_only: boolean;
     auto_create: boolean;
@@ -51,10 +53,6 @@ export interface Schema {
     filterable: boolean;
     popover: boolean;
     span: number;
-    allow_create: {
-        groups: string[];
-        roles: string[];
-    };
     default_value: unknown;
 }
 
@@ -63,6 +61,12 @@ export interface SchemaView {
     conditions: Condition[];
     sort_fields: string[];
     allow_create: {
+        disabled: boolean;
+        groups: string[];
+        roles: string[];
+    };
+    allow_edit: {
+        disabled: boolean;
         groups: string[];
         roles: string[];
     };

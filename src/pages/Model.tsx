@@ -76,7 +76,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { StatusBadge } from "@/components/model-components";
+import { StatusBadge, ResultBadge } from "@/components/model-components";
 import useUserState from "@/states/user";
 import {
     Popover,
@@ -114,6 +114,10 @@ function formatTableCell(
             element = (
                 <StatusBadge status={value as string} i18nModel={i18nModel} />
             );
+            className += " w-[100px]";
+            break;
+        case Category.Result:
+            element = <ResultBadge result={value} i18nModel={i18nModel} />;
             className += " w-[100px]";
             break;
         case Category.Json: {
@@ -309,10 +313,36 @@ export default function Model() {
     };
 
     const allowCreate = () => {
-        if (!userInfo.account || !schemaView.allow_create) {
+        if (
+            !userInfo.account ||
+            !schemaView.allow_create ||
+            schemaView.allow_create.disabled
+        ) {
             return false;
         }
         const { roles, groups } = schemaView.allow_create;
+        if (roles.includes("*")) {
+            return true;
+        }
+        if (roles.some((role) => userInfo.roles?.includes(role))) {
+            return true;
+        }
+        if (groups.some((group) => userInfo.groups?.includes(group))) {
+            return true;
+        }
+
+        return false;
+    };
+
+    const allowEdit = () => {
+        if (
+            !userInfo.account ||
+            !schemaView.allow_edit ||
+            schemaView.allow_edit.disabled
+        ) {
+            return false;
+        }
+        const { roles, groups } = schemaView.allow_edit;
         if (roles.includes("*")) {
             return true;
         }
@@ -367,7 +397,7 @@ export default function Model() {
         const supportSort = schemaView.sort_fields.includes(schema.name);
         let text = (
             <span className="text-muted-foreground">
-                {formatFieldName(schema.name)}
+                {formatFieldName(schema.label || schema.name)}
             </span>
         );
         if (supportSort) {
@@ -494,44 +524,47 @@ export default function Model() {
                     </Popover>
                 );
             }
+            const editBtn = (
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                            <EllipsisIcon />
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        className="w-48"
+                        align="start"
+                        side="left"
+                    >
+                        <DropdownMenuItem
+                            className="flex justify-between gap-2 cursor-pointer"
+                            onClick={() => {
+                                goToEdit(id);
+                            }}
+                        >
+                            {i18nModel("edit")}
+                            <FilePenLineIcon />
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            className="flex justify-between gap-2 cursor-pointer"
+                            onClick={() => {
+                                setTargetId(id);
+                                setOpenDeleteDialog(true);
+                            }}
+                        >
+                            {i18nModel("delete")}
+                            <TrashIcon />
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+            );
             fields.push(
                 <TableCell
                     key="actions-cell"
                     className={cn("h-14", actionClass)}
                 >
                     {viewBtn}
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                                <EllipsisIcon />
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                            className="w-48"
-                            align="start"
-                            side="left"
-                        >
-                            <DropdownMenuItem
-                                className="flex justify-between gap-2 cursor-pointer"
-                                onClick={() => {
-                                    goToEdit(id);
-                                }}
-                            >
-                                {i18nModel("edit")}
-                                <FilePenLineIcon />
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                                className="flex justify-between gap-2 cursor-pointer"
-                                onClick={() => {
-                                    setTargetId(id);
-                                    setOpenDeleteDialog(true);
-                                }}
-                            >
-                                {i18nModel("delete")}
-                                <TrashIcon />
-                            </DropdownMenuItem>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                    {allowEdit() && editBtn}
                 </TableCell>,
             );
 

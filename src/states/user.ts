@@ -8,7 +8,8 @@ import {
     FileIcon,
     HomeIcon,
     CogIcon,
-    LandPlotIcon,
+    RadarIcon,
+    ChevronsLeftRightEllipsisIcon,
 } from "lucide-react";
 import { HOME, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
@@ -108,7 +109,12 @@ const webMainNav: NavGroup[] = [
             {
                 title: "httpDetector",
                 url: `${MODEL}/http_detector`,
-                icon: LandPlotIcon,
+                icon: ChevronsLeftRightEllipsisIcon,
+            },
+            {
+                title: "httpStat",
+                url: `${MODEL}/http_stat`,
+                icon: RadarIcon,
             },
         ],
     },
