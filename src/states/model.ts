@@ -9,6 +9,8 @@ import {
 } from "@/constants/url";
 import request from "@/helpers/request";
 import { isNil } from "lodash-es";
+import { DateRange } from "react-day-picker";
+import dayjs from "dayjs";
 
 interface Option {
     label: string;
@@ -17,13 +19,16 @@ interface Option {
 
 export enum ConditionCategory {
     Input = "input",
+    Date = "date",
     Select = "select",
 }
 
 interface Condition {
     name: string;
+    label?: string;
     category: ConditionCategory;
     options: Option[];
+    defaultValue?: unknown;
 }
 
 export enum Category {
@@ -34,6 +39,7 @@ export enum Category {
     Status = "status",
     Result = "result",
     Strings = "strings",
+    ByteSize = "byte_size",
     Date = "date",
     Json = "json",
 }
@@ -130,16 +136,23 @@ const useModelState = create<ModelState>((set, get) => ({
         data.conditions = data.schemas
             .filter((schema) => schema.filterable)
             .map((schema) => {
-                let category = ConditionCategory.Input;
-                if (schema.options) {
-                    category = ConditionCategory.Select;
-                }
-                // TODO: 根据schema.category 确定filter options
-                return {
+                const condition: Condition = {
                     name: schema.name,
-                    category,
+                    label: schema.label,
+                    category: ConditionCategory.Input,
                     options: schema.options || [],
                 };
+                if (schema.category === Category.Date) {
+                    condition.category = ConditionCategory.Date;
+                    condition.defaultValue = [
+                        dayjs().subtract(2, "day").toISOString(),
+                        dayjs().toISOString(),
+                    ];
+                } else if (schema.options) {
+                    condition.category = ConditionCategory.Select;
+                }
+                // TODO: 根据schema.category 确定filter options
+                return condition;
             });
         set({
             model: name,

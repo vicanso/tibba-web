@@ -78,12 +78,27 @@ import {
 } from "@/components/ui/alert-dialog";
 import { StatusBadge, ResultBadge } from "@/components/model-components";
 import useUserState from "@/states/user";
+import SmartImage from "@/components/smart-image";
 import {
     Popover,
     PopoverContent,
     PopoverTrigger,
 } from "@/components/ui/popover";
-import SmartImage from "@/components/smart-image";
+import { DatePickerWithRange } from "@/components/date-range";
+
+// KiB, MiB, GiB
+function formatByteSize(size: number) {
+    if (size < 1024) {
+        return `${size} B`;
+    }
+    if (size < 1024 * 1024) {
+        return `${(size / 1024).toFixed(1)} KiB`;
+    }
+    if (size < 1024 * 1024 * 1024) {
+        return `${(size / 1024 / 1024).toFixed(1)} MiB`;
+    }
+    return `${(size / 1024 / 1024 / 1024).toFixed(1)} GiB`;
+}
 
 function formatTableCell(
     i18nModel: (value: string) => string,
@@ -103,6 +118,11 @@ function formatTableCell(
         case Category.Date:
             value = formatDate(value);
             className += " w-[180px]";
+            element = <span>{value}</span>;
+            break;
+        case Category.ByteSize:
+            value = formatByteSize(Number(value)) || "";
+            className += " w-[100px]";
             element = <span>{value}</span>;
             break;
         case Category.Bytes:
@@ -371,7 +391,14 @@ export default function Model() {
                 listParams.keyword = "";
                 listParams.filters = {};
                 modelReset();
-                await fetchSchema(modelName);
+                const schemaView = await fetchSchema(modelName);
+                schemaView.conditions.forEach((condition) => {
+                    if (condition.defaultValue) {
+                        listParams.filters[condition.name] =
+                            condition.defaultValue.toString();
+                    }
+                });
+                setFilters(listParams.filters);
                 modelViewOptions = getModelViewOptions(modelName);
                 setHiddenColumns(modelViewOptions.hiddenColumns);
             }
@@ -633,10 +660,14 @@ export default function Model() {
             );
         }
         if (page < pageCount) {
+            if (endPage < pageCount) {
+                arr.push(
+                    <PaginationItem key="ellipsis-end">
+                        <PaginationEllipsis />
+                    </PaginationItem>,
+                );
+            }
             arr.push(
-                <PaginationItem key="ellipsis-end">
-                    <PaginationEllipsis />
-                </PaginationItem>,
                 <PaginationItem key="next">
                     <PaginationLink
                         aria-label="Go to next page"
@@ -681,18 +712,34 @@ export default function Model() {
         );
     });
     const conditions = schemaView.conditions.map((condition) => {
-        const { category, options, name } = condition;
+        const { category, options, name, label } = condition;
         if (category === ConditionCategory.Input) {
             return (
                 <Input
                     className="w-[200px]"
                     key={name}
-                    placeholder={`${i18nModel("input")} ${name}`}
+                    placeholder={`${i18nModel("input")} ${label || name}`}
                     onChange={(e) => {
                         filters[name] = e.target.value.trim();
                         setFilters(filters);
                     }}
                 />
+            );
+        }
+        if (category === ConditionCategory.Date) {
+            return (
+                <div className="w-[300px]" key={name}>
+                    <DatePickerWithRange
+                        defaultDateRange={condition.defaultValue as string[]}
+                        onValueChange={(value) => {
+                            if (value.length != 0) {
+                                filters[name] = value.join(",");
+                            } else {
+                                delete filters[name];
+                            }
+                        }}
+                    />
+                </div>
             );
         }
         const items = options.map((option) => {
@@ -719,7 +766,7 @@ export default function Model() {
             >
                 <SelectTrigger className="w-[200px]">
                     <SelectValue
-                        placeholder={`${i18nModel("select")} ${name}`}
+                        placeholder={`${i18nModel("select")} ${label || name}`}
                     />
                 </SelectTrigger>
                 <SelectContent>
