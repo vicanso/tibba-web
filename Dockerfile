@@ -10,7 +10,7 @@ RUN apk update \
 
 FROM vicanso/static 
 
-COPY --from=builder /tibba-web/dist /static
+COPY --from=webbuilder /tibba-web/dist /static
 
 CMD ["static-serve"]
 
