@@ -4,7 +4,7 @@ COPY . /tibba-web
 RUN apk update \
     && apk add git make \
     && cd /tibba-web \
-    && npm install \
+    && npm install --force \
     && npm run  build 
 
 
