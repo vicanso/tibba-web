@@ -12,6 +12,8 @@ FROM vicanso/static
 
 COPY --from=webbuilder /tibba-web/dist /static
 
+EXPOSE 3000 
+
 CMD ["static-serve"]
 
 ENTRYPOINT ["/entrypoint.sh"]
