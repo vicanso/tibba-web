@@ -4,9 +4,6 @@ import react from "@vitejs/plugin-react"
 import { defineConfig } from "vite"
 
 function manualChunks(id: string) {
-  if (id.includes("react")) {
-    return "reacts";
-  }
   if (id.includes("node_modules")) {
     return "vendor";
   }
@@ -23,6 +20,7 @@ export default defineConfig({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  base: "./",
   build: {
     chunkSizeWarningLimit: 1024 * 1024,
     rollupOptions: {

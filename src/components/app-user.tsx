@@ -39,7 +39,7 @@ import { formatError } from "@/helpers/util";
 import { Link } from "react-router";
 import { LOGIN, PROFILE } from "@/constants/route";
 import { useEffect, useState, useCallback } from "react";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from "next-themes";
 import i18n from "@/i18n";
 import dayjs from "dayjs";
 

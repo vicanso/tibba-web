@@ -1,3 +1,5 @@
+"use client";
+
 import * as React from "react";
 import { AppSwitcher } from "@/components/app-switcher";
 import {
