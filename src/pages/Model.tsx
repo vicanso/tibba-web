@@ -116,7 +116,10 @@ function formatTableCell(
     if (schema.fixed) {
         className = "sticky left-0 bg-background z-10";
     }
-    let element = <span>{value}</span>;
+    if (schema.max_width) {
+        className += ` max-w-[${schema.max_width}px] truncate`;
+    }
+    let element = <span className="truncate">{value}</span>;
     switch (schema.category) {
         case Category.Date:
             value = formatDate(value);

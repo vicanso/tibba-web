@@ -60,6 +60,7 @@ export interface Schema {
     span: number;
     default_value: unknown;
     hidden_values: string[];
+    max_width?: number;
 }
 
 export interface SchemaView {
