@@ -59,6 +59,7 @@ export interface Schema {
     popover: boolean;
     span: number;
     default_value: unknown;
+    hidden_values: string[];
 }
 
 export interface SchemaView {

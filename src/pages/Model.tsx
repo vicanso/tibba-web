@@ -109,6 +109,9 @@ function formatTableCell(
     if (isObjectLike(data)) {
         value = JSON.stringify(data, null, 2);
     }
+    if (schema.hidden_values.includes(value)) {
+        value = "";
+    }
     let className = "";
     if (schema.fixed) {
         className = "sticky left-0 bg-background z-10";
@@ -634,6 +637,17 @@ export default function Model() {
                         <span className="hidden sm:block">
                             {i18nModel("previousPage")}
                         </span>
+                    </PaginationLink>
+                </PaginationItem>,
+                <PaginationItem key="first-page">
+                    <PaginationLink
+                        href="#"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            updatePage(1);
+                        }}
+                    >
+                        1
                     </PaginationLink>
                 </PaginationItem>,
                 <PaginationItem key="ellipsis-start">

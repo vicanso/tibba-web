@@ -78,8 +78,8 @@ export function MultiSelect({
                                     onChange(
                                         selected.includes(option.value)
                                             ? selected.filter(
-                                                (v) => v !== option.value,
-                                            )
+                                                  (v) => v !== option.value,
+                                              )
                                             : [...selected, option.value],
                                     );
                                 }}
