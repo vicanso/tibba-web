@@ -147,7 +147,7 @@ function formatTableCell(
             className += " w-[100px]";
             break;
         case Category.Result:
-            element = <ResultBadge result={value} i18nModel={i18nModel} />;
+            element = <ResultBadge result={value} />;
             className += " w-[100px]";
             break;
         case Category.Json: {

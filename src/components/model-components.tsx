@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@radix-ui/react-label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toString } from "lodash-es";
+import { CircleCheckBigIcon, XCircleIcon } from "lucide-react";
 
 export function StatusBadge({
     status,
@@ -29,24 +30,18 @@ export function StatusBadge({
     return element;
 }
 
-export function ResultBadge({
-    result,
-    i18nModel,
-}: {
-    result: string;
-    i18nModel: (value: string) => string;
-}) {
+export function ResultBadge({ result }: { result: string }) {
     let element = <></>;
     if (result === "1") {
         element = (
             <Badge variant="destructive" className="h-6">
-                {i18nModel("failed")}
+                <XCircleIcon className="w-4 h-4" />
             </Badge>
         );
     } else {
         element = (
             <Badge variant="default" className="bg-blue-500 text-white h-6">
-                {i18nModel("success")}
+                <CircleCheckBigIcon className="w-4 h-4" />
             </Badge>
         );
     }
