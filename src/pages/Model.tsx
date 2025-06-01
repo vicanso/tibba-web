@@ -119,7 +119,11 @@ function formatTableCell(
     if (schema.max_width) {
         className += ` max-w-[${schema.max_width}px] truncate`;
     }
-    let element = <span className="truncate">{value}</span>;
+    let element = (
+        <span className="truncate" title={value}>
+            {value}
+        </span>
+    );
     switch (schema.category) {
         case Category.Date:
             value = formatDate(value);
@@ -489,6 +493,8 @@ export default function Model() {
                 >
                     <Loader2Icon className="mx-auto h-6 w-6 animate-spin" />
                 </TableCell>
+                {/* TODO tailwindcss 如何引入变量的class */}
+                <TableCell className="max-w-[250px] max-w-[200px] max-w-[150px] max-w-[100px] max-w-[50px]"></TableCell>
             </TableRow>
         );
     } else if (modelCount === 0) {
