@@ -162,12 +162,20 @@ function formatTableCell(
                 console.error(error);
             }
             if (isJson) {
-                element = <pre className="break-all">{value}</pre>;
+                element = (
+                    <pre className="break-all text-wrap whitespace-pre-wrap">
+                        {value}
+                    </pre>
+                );
             }
             break;
         }
         case Category.Code:
-            element = <pre className="break-all">{value}</pre>;
+            element = (
+                <pre className="break-all text-wrap whitespace-pre-wrap">
+                    {value}
+                </pre>
+            );
             break;
         case Category.Strings:
             {
@@ -923,8 +931,8 @@ export default function Model() {
 
                                 goTo(
                                     FILE_UPLOADER +
-                                        "?groups=" +
-                                        groups.join(","),
+                                    "?groups=" +
+                                    groups.join(","),
                                 );
                             } else {
                                 goToEdit(0);
