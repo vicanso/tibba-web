@@ -162,12 +162,12 @@ function formatTableCell(
                 console.error(error);
             }
             if (isJson) {
-                element = <pre>{value}</pre>;
+                element = <pre className="break-all">{value}</pre>;
             }
             break;
         }
         case Category.Code:
-            element = <pre>{value}</pre>;
+            element = <pre className="break-all">{value}</pre>;
             break;
         case Category.Strings:
             {
