@@ -166,6 +166,9 @@ function formatTableCell(
             }
             break;
         }
+        case Category.Code:
+            element = <pre>{value}</pre>;
+            break;
         case Category.Strings:
             {
                 const arr = toArray(data).map((item) => {

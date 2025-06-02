@@ -41,6 +41,7 @@ export enum Category {
     ByteSize = "byte_size",
     Date = "date",
     Json = "json",
+    Code = "code",
 }
 
 export interface Schema {

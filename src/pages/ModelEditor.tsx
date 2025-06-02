@@ -464,6 +464,19 @@ export default function ModelEditor() {
                         });
                         break;
                     }
+                    case Category.Code: {
+                        valueField = renderFormField(name, (field) => {
+                            return (
+                                <Textarea
+                                    {...field}
+                                    value={field.value || ""}
+                                    disabled={disabled}
+                                    readOnly={disabled}
+                                />
+                            );
+                        });
+                        break;
+                    }
                     default: {
                         if (options) {
                             valueField = renderFormField(name, (field) => {
