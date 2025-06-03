@@ -350,7 +350,11 @@ export default function ModelEditor() {
                                         options={options || []}
                                         selected={form.getValues(name) || []}
                                         onChange={(value) =>
-                                            field.onChange(value)
+                                            field.onChange(
+                                                value.filter(
+                                                    (item) => item.length !== 0,
+                                                ),
+                                            )
                                         }
                                     />
                                 );

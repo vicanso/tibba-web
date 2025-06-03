@@ -190,6 +190,10 @@ const useModelState = create<ModelState>((set, get) => ({
                 filters,
             },
         });
+        // 如果在拉取数据时，model 已经改变，则不更新数据
+        if (model != get().model) {
+            return;
+        }
         if (shouldCount) {
             set({
                 items: data.items,
