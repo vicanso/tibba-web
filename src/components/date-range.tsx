@@ -24,10 +24,10 @@ export function DatePickerWithRange({
 }) {
     const [date, setDate] = React.useState<DateRange | undefined>({
         from: defaultDateRange?.[0]
-            ? dayjs(defaultDateRange[0]).toDate()
+            ? dayjs(defaultDateRange[0]).startOf("day").toDate()
             : undefined,
         to: defaultDateRange?.[1]
-            ? dayjs(defaultDateRange[1]).toDate()
+            ? dayjs(defaultDateRange[1]).endOf("day").toDate()
             : undefined,
     });
 
@@ -73,8 +73,12 @@ export function DatePickerWithRange({
                             if (onValueChange) {
                                 if (value && value.from && value.to) {
                                     onValueChange([
-                                        dayjs(value.from).toISOString(),
-                                        dayjs(value.to).toISOString(),
+                                        dayjs(value.from)
+                                            .startOf("day")
+                                            .toISOString(),
+                                        dayjs(value.to)
+                                            .endOf("day")
+                                            .toISOString(),
                                     ]);
                                 } else {
                                     onValueChange([]);
