@@ -85,6 +85,11 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { DatePickerWithRange } from "@/components/date-range";
+import {
+    HoverCard,
+    HoverCardContent,
+    HoverCardTrigger,
+} from "@/components/ui/hover-card";
 
 // KiB, MiB, GiB
 function formatByteSize(size: number) {
@@ -187,6 +192,33 @@ function formatTableCell(
                     );
                 });
                 element = <div className="flex flex-wrap gap-2">{arr}</div>;
+            }
+            break;
+        case Category.HoverCard:
+            {
+                const values = toArray(data).map((item) => {
+                    return (
+                        <Badge key={item} variant="outline">
+                            {item}
+                        </Badge>
+                    );
+                });
+                if (values.length !== 0) {
+                    element = (
+                        <HoverCard>
+                            <HoverCardTrigger asChild>
+                                <Button variant="ghost">
+                                    <EyeIcon />
+                                </Button>
+                            </HoverCardTrigger>
+                            <HoverCardContent className="w-auto">
+                                <div className="flex flex-col gap-2">
+                                    {values}
+                                </div>
+                            </HoverCardContent>
+                        </HoverCard>
+                    );
+                }
             }
             break;
         default:

@@ -8,7 +8,7 @@ import {
     MODEL_CREATE,
 } from "@/constants/url";
 import request from "@/helpers/request";
-import { isNil } from "lodash-es";
+import { isNil, toString } from "lodash-es";
 import dayjs from "dayjs";
 
 interface Option {
@@ -42,6 +42,7 @@ export enum Category {
     Date = "date",
     Json = "json",
     Code = "code",
+    HoverCard = "hover_card",
 }
 
 export interface Schema {
@@ -62,6 +63,7 @@ export interface Schema {
     default_value: unknown;
     hidden_values: string[];
     max_width?: number;
+    combinations?: string[];
 }
 
 export interface SchemaView {
@@ -194,6 +196,48 @@ const useModelState = create<ModelState>((set, get) => ({
         if (model != get().model) {
             return;
         }
+        const combinationSchemas: Schema[] = [];
+        const schemas = get().schemaView.schemas;
+        schemas.forEach((schema) => {
+            if (schema.combinations) {
+                combinationSchemas.push(schema);
+            }
+        });
+        combinationSchemas.forEach((schema) => {
+            if (!schema.combinations) {
+                return;
+            }
+            const fields: Schema[] = [];
+            schema.combinations.forEach((combination) => {
+                const found = schemas.find((item) => item.name === combination);
+                if (!found) {
+                    return;
+                }
+                fields.push(found);
+            });
+            if (fields.length === 0) {
+                return;
+            }
+            data.items.forEach((item) => {
+                const values: string[] = [];
+                fields.forEach((field) => {
+                    const value = item[field.name];
+                    const valueString = toString(value);
+                    if (
+                        isNil(value) ||
+                        field.hidden_values.includes(valueString)
+                    ) {
+                        return;
+                    }
+                    const name = field.label || field.name;
+                    values.push(`${name}: ${valueString}`);
+                });
+                if (values.length === 0) {
+                    return;
+                }
+                item[schema.name] = values;
+            });
+        });
         if (shouldCount) {
             set({
                 items: data.items,

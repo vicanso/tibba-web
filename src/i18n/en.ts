@@ -2,6 +2,7 @@ const common = {
     loading: "Loading...",
 };
 const sidebar = {
+    home: "Home",
     userFeature: "User",
     user: "User",
     loginHistory: "Login History",
