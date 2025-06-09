@@ -124,11 +124,19 @@ function formatTableCell(
     if (schema.max_width) {
         className += ` max-w-[${schema.max_width}px] truncate`;
     }
-    let element = (
-        <span className="truncate" title={value}>
-            {value}
-        </span>
-    );
+    let element = <span>{value}</span>;
+    if (schema.max_width) {
+        element = (
+            <HoverCard>
+                <HoverCardTrigger asChild>
+                    <span className="truncate">{value}</span>
+                </HoverCardTrigger>
+                <HoverCardContent className="w-auto">
+                    <div className="flex flex-col gap-2">{value}</div>
+                </HoverCardContent>
+            </HoverCard>
+        );
+    }
     switch (schema.category) {
         case Category.Date:
             value = formatDate(value);
