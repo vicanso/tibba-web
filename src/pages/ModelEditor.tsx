@@ -3,7 +3,7 @@ import { formatError } from "@/helpers/util";
 import { useI18n } from "@/i18n";
 import { goBack } from "@/routers";
 import useModelState, { Category, SchemaView } from "@/states/model";
-import { useParams, useSearchParams } from "react-router";
+import { data, useParams, useSearchParams } from "react-router";
 import { useShallow } from "zustand/react/shallow";
 import { useAsync } from "react-async-hook";
 import { toast } from "sonner";
@@ -204,6 +204,9 @@ export default function ModelEditor() {
             model: modelName || "",
             data: formatValue(updateData),
         });
+        const data = Object.assign({}, detail, updateData);
+        setDetail(data);
+        form.reset(formatFormValue(schemaView, data));
         toast.success(i18nModelEditor("updateSuccess"));
     }
     async function handleCreate(values: Record<string, unknown>) {
