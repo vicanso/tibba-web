@@ -3,7 +3,7 @@ import { formatError } from "@/helpers/util";
 import { useI18n } from "@/i18n";
 import { goBack } from "@/routers";
 import useModelState, { Category, SchemaView } from "@/states/model";
-import { data, useParams, useSearchParams } from "react-router";
+import { useParams, useSearchParams } from "react-router";
 import { useShallow } from "zustand/react/shallow";
 import { useAsync } from "react-async-hook";
 import { toast } from "sonner";
@@ -402,7 +402,7 @@ export default function ModelEditor() {
                                     {...field}
                                     value={
                                         field.value === null ||
-                                        field.value === undefined
+                                            field.value === undefined
                                             ? ""
                                             : field.value
                                     }
