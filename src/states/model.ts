@@ -149,7 +149,7 @@ const useModelState = create<ModelState>((set, get) => ({
                 if (schema.category === Category.Date) {
                     condition.category = ConditionCategory.Date;
                     condition.defaultValue = [
-                        dayjs().subtract(2, "day").startOf("day").toISOString(),
+                        dayjs().subtract(1, "day").startOf("day").toISOString(),
                         dayjs().endOf("day").toISOString(),
                     ];
                 } else if (schema.options) {

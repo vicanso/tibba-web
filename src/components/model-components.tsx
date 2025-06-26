@@ -4,6 +4,7 @@ import { Label } from "@radix-ui/react-label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toString } from "lodash-es";
 import { CircleCheckBigIcon, XCircleIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export function StatusBadge({
     status,
@@ -30,17 +31,26 @@ export function StatusBadge({
     return element;
 }
 
-export function ResultBadge({ result }: { result: string }) {
+export function ResultBadge({
+    result,
+    className,
+}: {
+    result: string;
+    className?: string;
+}) {
     let element = <></>;
     if (result === "1") {
         element = (
-            <Badge variant="destructive" className="h-6">
+            <Badge variant="destructive" className={cn("h-6", className)}>
                 <XCircleIcon className="w-4 h-4" />
             </Badge>
         );
     } else {
         element = (
-            <Badge variant="default" className="bg-blue-500 text-white h-6">
+            <Badge
+                variant="default"
+                className={cn("bg-blue-500 text-white h-6", className)}
+            >
                 <CircleCheckBigIcon className="w-4 h-4" />
             </Badge>
         );

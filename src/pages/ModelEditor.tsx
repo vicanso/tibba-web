@@ -12,7 +12,7 @@ import { useState } from "react";
 import { Loading } from "@/components/loading";
 import { MultiSelect } from "@/components/multi-select";
 import { Badge } from "@/components/ui/badge";
-import { StatusBadge, StatusRadioGroup } from "@/components/model-components";
+import { ResultBadge, StatusBadge, StatusRadioGroup } from "@/components/model-components";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon } from "lucide-react";
 import * as z from "zod";
@@ -323,17 +323,31 @@ export default function ModelEditor() {
                 }
                 return dom;
             });
-
-            if (category === Category.Status) {
-                valueField = renderFormField(name, (field) => {
-                    return (
-                        <StatusBadge
-                            status={toString(field.value)}
-                            i18nModel={i18nModel}
-                        />
-                    );
-                });
+            switch (category) {
+                case Category.Status: {
+                    valueField = renderFormField(name, (field) => {
+                        return (
+                            <StatusBadge
+                                status={toString(field.value)}
+                                i18nModel={i18nModel}
+                            />
+                        );
+                    });
+                    break;
+                }
+                case Category.Result: {
+                    valueField = renderFormField(name, (field) => {
+                        return (
+                            <ResultBadge
+                                className="mt-1"
+                                result={field.value}
+                            />
+                        );
+                    });
+                    break;
+                }
             }
+
             let canEdit = true;
             if (editType === EditType.View) {
                 canEdit = false;
