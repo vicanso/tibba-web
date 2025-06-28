@@ -43,6 +43,7 @@ export enum Category {
     Json = "json",
     Code = "code",
     HoverCard = "hover_card",
+    Placeholder = "placeholder",
 }
 
 export interface Schema {

@@ -346,6 +346,10 @@ export default function ModelEditor() {
                     });
                     break;
                 }
+                case Category.Placeholder: {
+                    valueField = <></>;
+                    break;
+                };
             }
 
             let canEdit = true;

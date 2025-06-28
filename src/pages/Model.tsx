@@ -473,7 +473,7 @@ export default function Model() {
     }
 
     const schemas = schemaView.schemas.filter(
-        (schema) => !schema.hidden && !hiddenColumns.includes(schema.name),
+        (schema) => !schema.hidden && !hiddenColumns.includes(schema.name) && schema.category != Category.Placeholder,
     );
     const noColumnKey = "no";
     const showNoColumn = !hiddenColumns.includes(noColumnKey);
@@ -768,7 +768,7 @@ export default function Model() {
         );
     };
     const filterColumns = schemaView.schemas
-        .filter((schema) => !schema.hidden)
+        .filter((schema) => !schema.hidden && schema.category != Category.Placeholder)
         .map((schema) => schema.name);
     filterColumns.unshift(noColumnKey);
     const columnFilter = filterColumns.map((name) => {
@@ -971,8 +971,8 @@ export default function Model() {
 
                                 goTo(
                                     FILE_UPLOADER +
-                                        "?groups=" +
-                                        groups.join(","),
+                                    "?groups=" +
+                                    groups.join(","),
                                 );
                             } else {
                                 goToEdit(0);
