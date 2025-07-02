@@ -42,7 +42,7 @@ export enum Category {
     Date = "date",
     Json = "json",
     Code = "code",
-    HoverCard = "hover_card",
+    PopoverCard = "popover_card",
     Placeholder = "placeholder",
 }
 

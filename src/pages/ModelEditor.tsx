@@ -12,7 +12,11 @@ import { useState } from "react";
 import { Loading } from "@/components/loading";
 import { MultiSelect } from "@/components/multi-select";
 import { Badge } from "@/components/ui/badge";
-import { ResultBadge, StatusBadge, StatusRadioGroup } from "@/components/model-components";
+import {
+    ResultBadge,
+    StatusBadge,
+    StatusRadioGroup,
+} from "@/components/model-components";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2Icon } from "lucide-react";
 import * as z from "zod";
@@ -349,7 +353,7 @@ export default function ModelEditor() {
                 case Category.Placeholder: {
                     valueField = <></>;
                     break;
-                };
+                }
             }
 
             let canEdit = true;
@@ -420,7 +424,7 @@ export default function ModelEditor() {
                                     {...field}
                                     value={
                                         field.value === null ||
-                                            field.value === undefined
+                                        field.value === undefined
                                             ? ""
                                             : field.value
                                     }

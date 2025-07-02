@@ -202,7 +202,7 @@ function formatTableCell(
                 element = <div className="flex flex-wrap gap-2">{arr}</div>;
             }
             break;
-        case Category.HoverCard:
+        case Category.PopoverCard:
             {
                 const values = toArray(data).map((item) => {
                     return (
@@ -213,18 +213,18 @@ function formatTableCell(
                 });
                 if (values.length !== 0) {
                     element = (
-                        <HoverCard>
-                            <HoverCardTrigger asChild>
+                        <Popover>
+                            <PopoverTrigger asChild>
                                 <Button variant="ghost">
                                     <EyeIcon />
                                 </Button>
-                            </HoverCardTrigger>
-                            <HoverCardContent className="w-auto">
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto">
                                 <div className="flex flex-col gap-2">
                                     {values}
                                 </div>
-                            </HoverCardContent>
-                        </HoverCard>
+                            </PopoverContent>
+                        </Popover>
                     );
                 }
             }
@@ -473,7 +473,10 @@ export default function Model() {
     }
 
     const schemas = schemaView.schemas.filter(
-        (schema) => !schema.hidden && !hiddenColumns.includes(schema.name) && schema.category != Category.Placeholder,
+        (schema) =>
+            !schema.hidden &&
+            !hiddenColumns.includes(schema.name) &&
+            schema.category != Category.Placeholder,
     );
     const noColumnKey = "no";
     const showNoColumn = !hiddenColumns.includes(noColumnKey);
@@ -768,7 +771,10 @@ export default function Model() {
         );
     };
     const filterColumns = schemaView.schemas
-        .filter((schema) => !schema.hidden && schema.category != Category.Placeholder)
+        .filter(
+            (schema) =>
+                !schema.hidden && schema.category != Category.Placeholder,
+        )
         .map((schema) => schema.name);
     filterColumns.unshift(noColumnKey);
     const columnFilter = filterColumns.map((name) => {
@@ -971,8 +977,8 @@ export default function Model() {
 
                                 goTo(
                                     FILE_UPLOADER +
-                                    "?groups=" +
-                                    groups.join(","),
+                                        "?groups=" +
+                                        groups.join(","),
                                 );
                             } else {
                                 goToEdit(0);
