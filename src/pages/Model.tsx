@@ -241,7 +241,7 @@ function formatTableCell(
                         {`${value.length} characters`}
                     </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-[480px]" align="end">
+                <PopoverContent className="w-auto" align="end">
                     {element}
                 </PopoverContent>
             </Popover>
@@ -603,7 +603,7 @@ export default function Model() {
                                 <EyeIcon />
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent className="w-[480px]" align="end">
+                        <PopoverContent className="w-[360px]" align="end">
                             {isImage ? (
                                 <SmartImage
                                     src={`/api/files/preview?name=${item.filename}`}
@@ -977,8 +977,8 @@ export default function Model() {
 
                                 goTo(
                                     FILE_UPLOADER +
-                                        "?groups=" +
-                                        groups.join(","),
+                                    "?groups=" +
+                                    groups.join(","),
                                 );
                             } else {
                                 goToEdit(0);

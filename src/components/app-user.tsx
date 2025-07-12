@@ -185,7 +185,7 @@ export function AppUser() {
                     中文
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                    className="cursor-pointe"
+                    className="cursor-pointer"
                     onClick={() => {
                         i18n.changeLanguage(enLang);
                     }}

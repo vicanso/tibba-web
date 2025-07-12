@@ -10,6 +10,7 @@ import {
     CogIcon,
     RadarIcon,
     ChevronsLeftRightEllipsisIcon,
+    ApertureIcon
 } from "lucide-react";
 import { HOME, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
@@ -115,6 +116,11 @@ const webMainNav: NavGroup[] = [
                 title: "httpStat",
                 url: `${MODEL}/http_stat`,
                 icon: RadarIcon,
+            },
+            {
+                title: "webPageDetector",
+                url: `${MODEL}/web_page_detector`,
+                icon: ApertureIcon,
             },
         ],
     },
