@@ -11,6 +11,7 @@ const sidebar = {
     config: "配置",
     httpStat: "Http统计",
     httpDetector: "Http检测器",
+    webPageDetector: "网页检测器",
 };
 const login = {
     title: "登录",

@@ -11,6 +11,7 @@ const sidebar = {
     config: "Config",
     httpStat: "HttpStat",
     httpDetector: "HttpDetector",
+    webPageDetector: "WebPageDetector",
 };
 const login = {
     title: "Login",
