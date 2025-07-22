@@ -977,8 +977,8 @@ export default function Model() {
 
                                 goTo(
                                     FILE_UPLOADER +
-                                    "?groups=" +
-                                    groups.join(","),
+                                        "?groups=" +
+                                        groups.join(","),
                                 );
                             } else {
                                 goToEdit(0);

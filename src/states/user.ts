@@ -10,7 +10,7 @@ import {
     CogIcon,
     RadarIcon,
     ChevronsLeftRightEllipsisIcon,
-    ApertureIcon
+    ApertureIcon,
 } from "lucide-react";
 import { HOME, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
