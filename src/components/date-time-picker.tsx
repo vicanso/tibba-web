@@ -16,6 +16,7 @@ import {
     PopoverTrigger,
 } from "@/components/ui/popover";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { useCallback } from "react";
 interface DateTimePickerProps {
     date: Date | undefined;
     setDate: (date: Date | undefined) => void;
@@ -41,10 +42,10 @@ export function DateTimePicker({
     };
 
     // 从日期中提取时间
-    const getTimeFromDate = (date: Date | undefined) => {
+    const getTimeFromDate = useCallback((date: Date | undefined) => {
         if (!date) return "";
         return currentDate.format("HH:mm");
-    };
+    }, [currentDate]);
 
     // 初始时间状态
     const [selectedTime, setSelectedTime] = React.useState<string>(
@@ -89,7 +90,7 @@ export function DateTimePicker({
             setSelectedTime(getTimeFromDate(date));
         }
         isUserTimeChange.current = false;
-    }, [date]);
+    }, [date, getTimeFromDate]);
 
     return (
         <div className={cn("flex items-center gap-2", className)}>
@@ -132,7 +133,7 @@ export function DateTimePicker({
                                                 }
                                                 selectedDate.setFullYear(
                                                     selectedDate.getFullYear() -
-                                                        1,
+                                                    1,
                                                 );
                                                 setDate(selectedDate);
                                             }}
@@ -151,7 +152,7 @@ export function DateTimePicker({
                                                 }
                                                 selectedDate.setFullYear(
                                                     selectedDate.getFullYear() +
-                                                        1,
+                                                    1,
                                                 );
                                                 setDate(selectedDate);
                                             }}
@@ -181,7 +182,7 @@ export function DateTimePicker({
                                                     size="icon"
                                                     variant={
                                                         date &&
-                                                        currentDate.hour() ===
+                                                            currentDate.hour() ===
                                                             hour
                                                             ? "secondary"
                                                             : "ghost"
@@ -216,7 +217,7 @@ export function DateTimePicker({
                                                 size="icon"
                                                 variant={
                                                     date &&
-                                                    currentDate.minute() ===
+                                                        currentDate.minute() ===
                                                         minute
                                                         ? "secondary"
                                                         : "ghost"

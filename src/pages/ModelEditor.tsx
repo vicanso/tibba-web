@@ -373,7 +373,11 @@ export default function ModelEditor() {
                                         {...field}
                                         disabled={disabled}
                                         options={options || []}
-                                        selected={form.getValues(name) || []}
+                                        selected={
+                                            (form.getValues(
+                                                name,
+                                            ) as string[]) || []
+                                        }
                                         onChange={(value) =>
                                             field.onChange(
                                                 value.filter(

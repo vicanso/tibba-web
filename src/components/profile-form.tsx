@@ -22,12 +22,8 @@ import { formatError, getDirtyValues, DirtyFields } from "@/helpers/util";
 import { Loader2Icon } from "lucide-react";
 
 const profileFormSchema = z.object({
-    email: z
-        .string({
-            required_error: "Please input your email.",
-        })
-        .email(),
-    avatar: z.string().url({ message: "Please enter a valid URL." }),
+    email: z.email({ message: "Please input your email." }),
+    avatar: z.url({ message: "Please enter a valid URL." }),
     roles: z.array(z.string()).optional(),
     groups: z.array(z.string()).optional(),
 });
