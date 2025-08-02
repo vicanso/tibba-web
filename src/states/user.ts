@@ -11,6 +11,8 @@ import {
     RadarIcon,
     ChevronsLeftRightEllipsisIcon,
     ApertureIcon,
+    GroupIcon,
+    UserIcon,
 } from "lucide-react";
 import { HOME, LOGIN_HISTORY, MODEL } from "@/constants/route";
 
@@ -121,6 +123,16 @@ const webMainNav: NavGroup[] = [
                 title: "webPageDetector",
                 url: `${MODEL}/web_page_detector`,
                 icon: ApertureIcon,
+            },
+            {
+                title: "detectorGroup",
+                url: `${MODEL}/detector_group`,
+                icon: GroupIcon,
+            },
+            {
+                title: "detectorGroupUser",
+                url: `${MODEL}/detector_group_user`,
+                icon: UserIcon,
             },
         ],
     },

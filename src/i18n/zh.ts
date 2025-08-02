@@ -12,6 +12,8 @@ const sidebar = {
     httpStat: "Http统计",
     httpDetector: "Http检测器",
     webPageDetector: "网页检测器",
+    detectorGroup: "用户分组",
+    detectorGroupUser: "用户分组用户",
 };
 const login = {
     title: "登录",

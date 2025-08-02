@@ -12,6 +12,8 @@ const sidebar = {
     httpStat: "HttpStat",
     httpDetector: "HttpDetector",
     webPageDetector: "WebPageDetector",
+    detectorGroup: "DetectorGroup",
+    detectorGroupUser: "DetectorGroupUser",
 };
 const login = {
     title: "Login",

@@ -42,10 +42,13 @@ export function DateTimePicker({
     };
 
     // 从日期中提取时间
-    const getTimeFromDate = useCallback((date: Date | undefined) => {
-        if (!date) return "";
-        return currentDate.format("HH:mm");
-    }, [currentDate]);
+    const getTimeFromDate = useCallback(
+        (date: Date | undefined) => {
+            if (!date) return "";
+            return currentDate.format("HH:mm");
+        },
+        [currentDate],
+    );
 
     // 初始时间状态
     const [selectedTime, setSelectedTime] = React.useState<string>(
@@ -133,7 +136,7 @@ export function DateTimePicker({
                                                 }
                                                 selectedDate.setFullYear(
                                                     selectedDate.getFullYear() -
-                                                    1,
+                                                        1,
                                                 );
                                                 setDate(selectedDate);
                                             }}
@@ -152,7 +155,7 @@ export function DateTimePicker({
                                                 }
                                                 selectedDate.setFullYear(
                                                     selectedDate.getFullYear() +
-                                                    1,
+                                                        1,
                                                 );
                                                 setDate(selectedDate);
                                             }}
@@ -182,7 +185,7 @@ export function DateTimePicker({
                                                     size="icon"
                                                     variant={
                                                         date &&
-                                                            currentDate.hour() ===
+                                                        currentDate.hour() ===
                                                             hour
                                                             ? "secondary"
                                                             : "ghost"
@@ -217,7 +220,7 @@ export function DateTimePicker({
                                                 size="icon"
                                                 variant={
                                                     date &&
-                                                        currentDate.minute() ===
+                                                    currentDate.minute() ===
                                                         minute
                                                         ? "secondary"
                                                         : "ghost"

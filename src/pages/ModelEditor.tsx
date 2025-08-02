@@ -422,28 +422,62 @@ export default function ModelEditor() {
                         break;
                     }
                     case Category.Number: {
-                        valueField = renderFormField(name, (field) => {
-                            return (
-                                <Input
-                                    {...field}
-                                    value={
-                                        field.value === null ||
-                                        field.value === undefined
-                                            ? ""
-                                            : field.value
-                                    }
-                                    disabled={disabled}
-                                    readOnly={disabled}
-                                    type="number"
-                                    onChange={(e) => {
-                                        const value = e.target.value;
-                                        field.onChange(
-                                            value === "" ? null : Number(value),
-                                        );
-                                    }}
-                                />
-                            );
-                        });
+                        if (options) {
+                            valueField = renderFormField(name, (field) => {
+                                return (
+                                    <Select
+                                        {...field}
+                                        onValueChange={(value) => {
+                                            field.onChange(Number(value));
+                                        }}
+                                    >
+                                        <SelectTrigger className="w-full">
+                                            <SelectValue placeholder={name} />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectGroup>
+                                                <SelectLabel>
+                                                    {name}
+                                                </SelectLabel>
+                                                {options.map((option) => (
+                                                    <SelectItem
+                                                        key={option.value}
+                                                        value={option.value}
+                                                    >
+                                                        {option.label}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectGroup>
+                                        </SelectContent>
+                                    </Select>
+                                );
+                            });
+                        } else {
+                            valueField = renderFormField(name, (field) => {
+                                return (
+                                    <Input
+                                        {...field}
+                                        value={
+                                            field.value === null ||
+                                            field.value === undefined
+                                                ? ""
+                                                : field.value
+                                        }
+                                        disabled={disabled}
+                                        readOnly={disabled}
+                                        type="number"
+                                        onChange={(e) => {
+                                            const value = e.target.value;
+                                            field.onChange(
+                                                value === ""
+                                                    ? null
+                                                    : Number(value),
+                                            );
+                                        }}
+                                    />
+                                );
+                            });
+                        }
                         break;
                     }
                     case Category.Boolean: {
