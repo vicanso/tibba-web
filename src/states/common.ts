@@ -8,12 +8,16 @@ interface Captcha {
 }
 
 interface CommonState {
-    fetchCaptcha: () => Promise<Captcha>;
+    fetchCaptcha: (theme: string) => Promise<Captcha>;
 }
 
 const useCommonState = create<CommonState>(() => ({
-    fetchCaptcha: async () => {
-        const { data } = await request.get<Captcha>(COMMON_CAPTCHA);
+    fetchCaptcha: async (theme: string) => {
+        const { data } = await request.get<Captcha>(COMMON_CAPTCHA, {
+            params: {
+                theme,
+            },
+        });
         return data;
     },
 }));

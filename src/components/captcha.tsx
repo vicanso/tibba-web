@@ -10,6 +10,8 @@ import useCommonState from "@/states/common";
 import { useShallow } from "zustand/react/shallow";
 import { toast } from "sonner";
 import { formatError } from "@/helpers/util";
+import { useTheme } from "next-themes";
+import { getSystemTheme } from "@/helpers/util";
 
 interface CaptchaProps {
     className?: string;
@@ -20,6 +22,7 @@ export function Captcha({ className, onChange }: CaptchaProps) {
     const [fetchCaptcha] = useCommonState(
         useShallow((state) => [state.fetchCaptcha]),
     );
+    const { theme } = useTheme();
     const [captcha, setCaptcha] = useState({
         id: "",
         data: "",
@@ -30,7 +33,11 @@ export function Captcha({ className, onChange }: CaptchaProps) {
             data: "",
         });
         try {
-            const data = await fetchCaptcha();
+            let currentTheme = theme || "";
+            if (!currentTheme || currentTheme === "system") {
+                currentTheme = getSystemTheme();
+            }
+            const data = await fetchCaptcha(currentTheme);
             setCaptcha(data);
         } catch (error) {
             toast.error(formatError(error));
@@ -39,7 +46,7 @@ export function Captcha({ className, onChange }: CaptchaProps) {
                 data: "",
             });
         }
-    }, [fetchCaptcha]);
+    }, [fetchCaptcha, theme]);
 
     useEffect(() => {
         refreshCaptcha();

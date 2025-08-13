@@ -80,3 +80,11 @@ export function getDirtyValues<T extends object>(
         return acc;
     }, {} as Partial<T>);
 }
+
+export function getSystemTheme() {
+    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        return 'dark';
+    } else {
+        return 'light'; // 默认浅色
+    }
+}
