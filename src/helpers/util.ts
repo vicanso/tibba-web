@@ -82,9 +82,9 @@ export function getDirtyValues<T extends object>(
 }
 
 export function getSystemTheme() {
-    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-        return 'dark';
+    if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        return "dark";
     } else {
-        return 'light'; // 默认浅色
+        return "light"; // 默认浅色
     }
 }
