@@ -1,4 +1,4 @@
-FROM node:22-alpine AS webbuilder
+FROM node:24-alpine AS webbuilder
 
 COPY . /tibba-web
 RUN apk update \

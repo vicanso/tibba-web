@@ -4,6 +4,7 @@ import React from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { RouterProvider } from "react-router";
 import { ThemeProvider } from "next-themes";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import router from "@/routers";
 
 export default function App() {
@@ -14,8 +15,10 @@ export default function App() {
                 attribute="class"
                 enableSystem
             >
-                <Toaster />
-                <RouterProvider router={router} />
+                <TooltipProvider>
+                    <Toaster />
+                    <RouterProvider router={router} />
+                </TooltipProvider>
             </ThemeProvider>
         </React.StrictMode>
     );
