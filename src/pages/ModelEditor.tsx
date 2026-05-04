@@ -8,7 +8,7 @@ import { useShallow } from "zustand/react/shallow";
 import { useAsync } from "react-async-hook";
 import { toast } from "sonner";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Loading } from "@/components/loading";
 import { MultiSelect } from "@/components/multi-select";
 import { Badge } from "@/components/ui/badge";
@@ -43,6 +43,90 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { isNil, isObjectLike, toString } from "lodash-es";
+interface SearchOption {
+    label: string;
+    value: string;
+}
+
+const SearchSelect = React.forwardRef<
+    HTMLInputElement,
+    {
+        value: string;
+        disabled?: boolean;
+        searchModel: string;
+        onSearch: (model: string, keyword: string) => Promise<{ options: SearchOption[] }>;
+        onChange: (value: string) => void;
+        onBlur?: () => void;
+    }
+>(function SearchSelect({ value, disabled, searchModel, onSearch, onChange, onBlur }, ref) {
+    const [inputValue, setInputValue] = React.useState("");
+    const [options, setOptions] = React.useState<SearchOption[]>([]);
+    const [showList, setShowList] = React.useState(false);
+    const timerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+    const selectedLabel = React.useRef("");
+
+    React.useEffect(() => {
+        if (!value) {
+            selectedLabel.current = "";
+            setInputValue("");
+        }
+    }, [value]);
+
+    function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+        const keyword = e.target.value;
+        setInputValue(keyword);
+        setShowList(true);
+        if (timerRef.current) clearTimeout(timerRef.current);
+        timerRef.current = setTimeout(async () => {
+            const result = await onSearch(searchModel, keyword);
+            setOptions(result.options);
+        }, 300);
+    }
+
+    function handleSelect(option: SearchOption) {
+        selectedLabel.current = option.label;
+        setInputValue(option.label);
+        setOptions([]);
+        setShowList(false);
+        onChange(option.value);
+    }
+
+    function handleBlur() {
+        setShowList(false);
+        setInputValue(selectedLabel.current);
+        onBlur?.();
+    }
+
+    return (
+        <div className="relative">
+            <Input
+                ref={ref}
+                value={inputValue}
+                disabled={disabled}
+                onChange={handleChange}
+                onBlur={handleBlur}
+                onFocus={() => setShowList(options.length > 0)}
+            />
+            {showList && options.length > 0 && (
+                <ul className="absolute z-50 mt-1 w-full rounded-md border bg-popover shadow-md">
+                    {options.map((option) => (
+                        <li
+                            key={option.value}
+                            className="cursor-pointer px-3 py-2 text-sm hover:bg-accent"
+                            onMouseDown={(e) => {
+                                e.preventDefault();
+                                handleSelect(option);
+                            }}
+                        >
+                            {option.label}
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+    );
+});
+
 enum EditType {
     Edit = "edit",
     Create = "create",
@@ -58,7 +142,7 @@ export default function ModelEditor() {
     const [initialized, setInitialized] = useState(false);
     const [processing, setProcessing] = useState(false);
     const [detail, setDetail] = useState<Record<string, unknown>>({});
-    const [schemaView, fetchSchema, modelDetail, modelUpdate, modelCreate] =
+    const [schemaView, fetchSchema, modelDetail, modelUpdate, modelCreate, modelSearch] =
         useModelState(
             useShallow((state) => [
                 state.schemaView,
@@ -66,6 +150,7 @@ export default function ModelEditor() {
                 state.detail,
                 state.update,
                 state.create,
+                state.search,
             ]),
         );
     const modelId = Number(id);
@@ -459,7 +544,7 @@ export default function ModelEditor() {
                                         {...field}
                                         value={
                                             field.value === null ||
-                                            field.value === undefined
+                                                field.value === undefined
                                                 ? ""
                                                 : field.value
                                         }
@@ -478,6 +563,27 @@ export default function ModelEditor() {
                                 );
                             });
                         }
+                        break;
+                    }
+                    case Category.Search: {
+                        valueField = renderFormField(name, (field) => {
+                            return (
+                                <SearchSelect
+                                    ref={field.ref}
+                                    value={toString(field.value)}
+                                    disabled={disabled}
+                                    searchModel={schema.search_model}
+                                    onSearch={(model, keyword) =>
+                                        modelSearch({
+                                            model,
+                                            keyword,
+                                        })
+                                    }
+                                    onChange={field.onChange}
+                                    onBlur={field.onBlur}
+                                />
+                            );
+                        });
                         break;
                     }
                     case Category.Boolean: {

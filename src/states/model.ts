@@ -6,6 +6,7 @@ import {
     MODEL_DETAIL,
     MODEL_UPDATE,
     MODEL_CREATE,
+    MODEL_SEARCH,
 } from "@/constants/url";
 import request from "@/helpers/request";
 import { isNil, toString } from "lodash-es";
@@ -44,6 +45,7 @@ export enum Category {
     Code = "code",
     PopoverCard = "popover_card",
     Placeholder = "placeholder",
+    Search = "search",
 }
 
 export interface Schema {
@@ -56,6 +58,7 @@ export interface Schema {
     identity: boolean;
     fixed: boolean;
     options: Option[] | null;
+    search_model: string;
     hidden: boolean;
     sortable: boolean;
     filterable: boolean;
@@ -112,6 +115,10 @@ interface ModelState {
         model: string;
         data: Record<string, unknown>;
     }) => Promise<{ id: number }>;
+    search: (params: {
+        model: string;
+        keyword: string;
+    }) => Promise<{ options: Option[] }>;
 }
 
 const useModelState = create<ModelState>((set, get) => ({
@@ -308,6 +315,21 @@ const useModelState = create<ModelState>((set, get) => ({
         const { data } = await request.post<{ id: number }>(
             MODEL_CREATE,
             params,
+        );
+        return data;
+    },
+    search: async (params: {
+        model: string;
+        keyword: string;
+    }) => {
+        const { data } = await request.get<{ options: Option[] }>(
+            MODEL_SEARCH,
+            {
+                params: {
+                    model: params.model,
+                    keyword: params.keyword,
+                },
+            },
         );
         return data;
     },
